@@ -1,2 +1,24 @@
-<insert log here>
-Hello
+Meeting 1 - 3/20
+
+Fixes:
+Make sure that user stories are in "As a user..." form
+Break down user stories into smallest units of work
+Since user stories are individual features, they have a front and back end component (no "database" user story)
+
+Questions:
+Are there security risks involved with giving people access to other websites?
+- Other sites should be read only; you can only edit your own sites
+Are there any copyright issues?
+- May need some sort of content moderation, but this is probably beyond the scope of the project
+How much flexibility do users have with making their webpage?
+- Users can only make a static site using HTML/CSS/JS
+
+TODO:
+Brainstorm more features and refine project scope
+
+Feature ideas:
+- Friends list
+- Chat room
+- DMs with individual users
+- System for "liking" other websites
+- Tutorial page (maybe when sharingc their site, the creator has an option to make a mini blog post about how they made it)
