@@ -120,6 +120,10 @@ app.post('/login', async (req, res) => {
     }
 });
 
+app.get('/welcome', (req, res) => {
+    res.json({status: 'success', message: 'Welcome!'});
+});
+
 
 // Authentication Middleware.
 const auth = (req, res, next) => {
@@ -140,10 +144,6 @@ app.get('/discover', (req, res) => {
 app.get('/logout', (req, res) => {
     req.session.destroy();
     res.render('pages/logout', { message: "Logged out successfully" })
-});
-
-app.get('/welcome', (req, res) => {
-    res.json({status: 'success', message: 'Welcome!'});
 });
 
 // *****************************************************
