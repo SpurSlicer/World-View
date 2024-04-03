@@ -28,5 +28,73 @@ describe('Server!', () => {
 });
 
 // *********************** TODO: WRITE 2 UNIT TESTCASES **************************
+describe('Testing Add User API', () => {
+  it('positive : /register', done => {
+    chai
+      .request(server)
+      .post('/register')
+      .send({username: 'test_name', password: 'test_password'})
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body.message).to.equals('Success');
+        done();
+      });
+  });
+  it('Negative : /register. Checking invalid name', done => {
+    chai
+      .request(server)
+      .post('/register')
+      .send({username: 'test_name', password: 'test_password'})
+      .end((err, res) => {
+        expect(res).to.have.status(400);
+        expect(res.body.message).to.equals('Invalid input');
+        done();
+      });
+  });
+});
+
+/*
+describe('Testing Redirect', () => {
+  // Sample test case given to test /test endpoint.
+  it('test route should redirect to /login with 302 HTTP status code', done => {
+    chai
+      .request(server)
+      .get('/test') //NOTE this needs to be changed to something real that actually redirects
+      .end((err, res) => {
+        res.should.have.status(302); // Expecting a redirect status code
+        res.should.redirectTo(/^.*127\.0\.0\.1.*\/login$/); // Expecting a redirect to /login with the mentioned Regex
+        done();
+      });
+  });
+});
+*/
+
+describe('Testing login render', () => {
+  // Sample test case given to test /test endpoint.
+  it('test "/login" route should render with an html response', done => {
+    chai
+      .request(server)
+      .get('/login') // for reference, see lab 8's login route (/login) which renders home.hbs
+      .end((err, res) => {
+        res.should.have.status(200); // Expecting a success status code
+        res.should.be.html; // Expecting a HTML response
+        done();
+      });
+  });
+});
+
+describe('Testing logout render', () => {
+  // Sample test case given to test /test endpoint.
+  it('test "/logout" route should render with an html response', done => {
+    chai
+      .request(server)
+      .get('/logout') // for reference, see lab 8's login route (/login) which renders home.hbs
+      .end((err, res) => {
+        res.should.have.status(200); // Expecting a success status code
+        res.should.be.html; // Expecting a HTML response
+        done();
+      });
+  });
+});
 
 // ********************************************************************************
