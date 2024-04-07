@@ -1,6 +1,7 @@
 // *****************************************************
 // <!-- Section 1 : Import Dependencies -->
 // *****************************************************
+import all from "googleapi.js"
 
 const express = require('express'); // To build an application server or API
 const app = express();
@@ -69,13 +70,18 @@ app.use(
   })
 );
 
+
+function access_username(username) {
+
+}
+
 // *****************************************************
 // <!-- Section 4 : API Routes -->
 // *****************************************************
 
 // TODO - Include your API routes here
 app.get('/', (req, res) => {
-    res.redirect('/login');
+    res.redirect('/messageBoard');
 });
 
 app.get('/register', (req, res) => {
@@ -112,18 +118,13 @@ app.post('/login', async (req, res) => {
         } else {
             req.session.user = user;
             await req.session.save();
-            res.redirect('/discover');
+            res.redirect('/messageBoard');
         }
     } catch (err) {
         console.log(err);
         res.render('pages/login', { message: "A server error occurred." });
     }
 });
-
-app.get('/welcome', (req, res) => {
-    res.json({status: 'success', message: 'Welcome!'});
-});
-
 
 // Authentication Middleware.
 const auth = (req, res, next) => {
@@ -137,18 +138,19 @@ const auth = (req, res, next) => {
 // Authentication Required
 app.use(auth);
 
-app.get('/discover', (req, res) => {
-    
-});
-
 app.get('/logout', (req, res) => {
     req.session.destroy();
     res.render('pages/logout', { message: "Logged out successfully" })
 });
 
-app.get('/welcome', (req, res) => {
-    res.json({status: 'success', message: 'Welcome!'});
-});
+app.get('/myWorlds', (req, res) => {
+    if (!req.session.user) {
+      return res.redirect('/login');
+    }
+    const userHash = bcrypt.hash(req.session.user, 10);
+    
+
+})
 
 // *****************************************************
 // <!-- Section 5 : Start Server-->
