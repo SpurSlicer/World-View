@@ -53,6 +53,20 @@ describe('Testing Add User API', () => {
   });
 });
 
+describe('Testing logout render', () => {
+  // Sample test case given to test /test endpoint.
+  it('test "/logout" route should render with an html response', done => {
+    chai
+      .request(server)
+      .get('/logout') // for reference, see lab 8's login route (/login) which renders home.hbs
+      .end((err, res) => {
+        res.should.have.status(200); // Expecting a success status code
+        res.should.be.html; // Expecting a HTML response
+        done();
+      });
+  });
+});
+
 describe('Testing login requests', () => {
   // Sample test case given to test /test endpoint.
   it('Positive: "/login" route should render with an html response', done => {
@@ -79,18 +93,5 @@ describe('Testing login requests', () => {
   });
 });
 
-describe('Testing logout render', () => {
-  // Sample test case given to test /test endpoint.
-  it('test "/logout" route should render with an html response', done => {
-    chai
-      .request(server)
-      .get('/logout') // for reference, see lab 8's login route (/login) which renders home.hbs
-      .end((err, res) => {
-        res.should.have.status(200); // Expecting a success status code
-        res.should.be.html; // Expecting a HTML response
-        done();
-      });
-  });
-});
 
 // ********************************************************************************

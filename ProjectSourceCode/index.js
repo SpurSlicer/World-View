@@ -15,7 +15,7 @@ const session = require('express-session'); // To set the session object. To sto
 const bcrypt = require('bcrypt'); //  To hash passwords
 const fs = require('fs'); // File system operations
 
-const dir = path.join('views', 'world_files');
+const dir = "./world_files"
 const sampleHTML = 
   `<!DOCTYPE html>
   <html lang="en">
@@ -185,30 +185,36 @@ app.post('/save', async (req, res) => {
       const queryDel = 'DELETE FROM files WHERE username_hash = $1;';
       const queryIns = 'INSERT INTO files (username_hash, filename, data) VALUES ($1, $2, $3);';
       const usernameHash = await bcrypt.hash(req.session.user.username, 10);
-      await db.one(queryDel, [usernameHash]);
-      const worldDir = fs.opendir(dir, err => {
-        if (err) {
-          console.log(`${dir} could not be opened!`);
-        } else {
-          console.log(`${dir} was opened!`);
-        }
-      });
-      for  (const dirent of worldDir) {
-        if (dirent.isFile()) {
-          fs.readFile(path.join(dir, dirent.name), async (err, data) => {
+      await db.one(queryDel, [usernameHash])
+        .then(() => {
+          const worldDir = fs.opendir(dir, err => {
             if (err) {
-              console.log(`${dirent.name} caused an error!`);
+              console.log(`${dir} could not be opened!`);
             } else {
-              console.log(data);
-              await db.one(queryIns, [usernameHash, (dir + dirent.name), data]);  
-              console.log(`${dirent.name} was saved!`);
+              console.log(`${dir} was opened!`);
             }
-          });
-        } else {
-          console.log(`${dir + dirent.name} is not a file`);
-        }
-      }
-      dir.close();
+            for  (const dirent of worldDir) {
+              if (dirent.isFile()) {
+                fs.readFile(path.join(dir, dirent.name), async (err, data) => {
+                  if (err) {
+                    console.log(`${dirent.name} caused an error!`);
+                  } else {
+                    console.log(data);
+                    await db.one(queryIns, [usernameHash, (dir + dirent.name), data]);  
+                    console.log(`${dirent.name} was saved!`);
+                  }
+                });
+              } else {
+                console.log(`${dir + dirent.name} is not a file`);
+              }
+            }
+            dir.close();
+        })
+        .catch((err) => {
+          console.log("No files were deleted I guess");
+          res.status(400);
+        })
+      });
     } catch (err) {
         //console.log(err);
         res.render('pages/login', { message: "A server error occurred." });
@@ -237,14 +243,16 @@ app.get('/logout', (req, res) => {
     } else {
       console.log(`${dir} deleted!`);
     }
+    fs.mkdir(dir, {recursive:true}, (err) => {
+      if (err) {
+        console.log(`${dir} could not be remade!`);
+      } else {
+        console.log(`${dir} remade!`);
+      }
+    });
   });
-  fs.mkdir(dir, (err) => {
-    if (err) {
-      console.log(`${dir} could not be remade!`);
-    } else {
-      console.log(`${dir} remade!`);
-    }
-  });
+  //fs.rmSync(dir, {recursive:true})
+  //fs.mkdirSync(dir, {recursive:true})
   req.session.destroy();
   res.status(200);
   res.render('pages/logout', { message: "Logged out successfully" })
