@@ -263,6 +263,60 @@ app.get('/myWorlds', (req, res) => {
     const userHash = bcrypt.hash(req.session.user, 10);
 });
 
+// Direct Messages
+
+app.get('/users', (req, res) => {
+    const currentUserId = req.session.userId; // Ensure your session is correctly configured to get this
+
+    db.any('SELECT username FROM users')
+        .then(users => {
+            res.render('pages/users', { users });
+        })
+        .catch(error => {
+            console.log('ERROR:', error);
+            res.send('Error fetching users');
+        });
+});
+
+
+app.get('/messages/:username', (req, res) => {
+    const messagesFrom = req.params.username;
+    const currentUser = req.session.user.username
+
+    db.any(`
+        SELECT m.*, u.username AS sender_username
+        FROM messages m
+        JOIN users u ON m.sender_id = u.username
+        WHERE (sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $1)
+        ORDER BY timestamp ASC`, [currentUser, messagesFrom])
+        .then(messages => {
+            res.render('pages/messages', { messages, receiver: messagesFrom });
+        })
+        .catch(error => {
+            console.log('ERROR:', error);
+            res.send('Error fetching messages');
+        });
+});
+
+
+
+app.post('/messages/:username', (req, res) => {
+    const sendingTo = req.params.username;
+    const currentUser = req.session.user.username
+    const message = req.body.message;
+
+    db.none('INSERT INTO messages (sender_id, receiver_id, message) VALUES ($1, $2, $3)', [currentUser, sendingTo, message])
+        .then(() => {
+            res.redirect('/messages/' + sendingTo);
+        })
+        .catch(error => {
+            console.log('ERROR:', error);
+            res.send('Error sending message');
+        });
+});
+
+
+
 
 // *****************************************************
 // <!-- Section 5 : Start Server-->
