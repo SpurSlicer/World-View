@@ -268,6 +268,19 @@ app.get('/myWorlds', (req, res) => {
     const userHash = bcrypt.hash(req.session.user, 10);
 });
 
+app.get('/home', async (req, res) => {
+  try {
+    
+    const query = 'SELECT users.username, files.filename FROM users LEFT JOIN files on files.username_hash = users.username;';
+    const data = await db.any(query);
+
+    res.render('pages/home', { title: 'Welcome to World View!', nodes: data });
+
+  }
+  catch (err){
+    res.render('pages/home', { message: "Error!! home"});
+  }
+});
 
 // *****************************************************
 // <!-- Section 5 : Start Server-->
