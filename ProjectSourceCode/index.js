@@ -1,6 +1,8 @@
 // *****************************************************
 // <!-- Section 1 : Import Dependencies -->
 // *****************************************************
+//import { fstat } from "fs";
+//import all from "googleapi.js"
 
 const express = require('express'); // To build an application server or API
 const app = express();
@@ -11,6 +13,21 @@ const pgp = require('pg-promise')(); // To connect to the Postgres DB from the n
 const bodyParser = require('body-parser');
 const session = require('express-session'); // To set the session object. To store or access session data, use the `req.session`, which is (generally) serialized as JSON by the store.
 const bcrypt = require('bcrypt'); //  To hash passwords
+const fs = require('fs'); // File system operations
+
+const dir = path.join("views", "world_files");
+const sampleHTML = 
+  `<!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+  </head>
+  <body>
+    
+  </body>
+  </html>`;
 
 // *****************************************************
 // <!-- Section 2 : Connect to DB -->
@@ -69,17 +86,26 @@ app.use(
   })
 );
 
+
+
 // *****************************************************
 // <!-- Section 4 : API Routes -->
 // *****************************************************
 
+function deleteFiles() {
+  fs.rmSync(dir, {recursive:true});
+  fs.mkdirSync(dir, {recursive:true});
+}
+
 // TODO - Include your API routes here
 app.get('/', (req, res) => {
-    res.redirect('/login');
+    res.status(200);
+    res.redirect('/messageBoard');
 });
 
 app.get('/register', (req, res) => {
-    res.render('pages/register')
+  res.status(200);
+  res.render('pages/register')
 });
 
 app.post('/register', async (req, res) => {
@@ -87,43 +113,119 @@ app.post('/register', async (req, res) => {
     const hash = await bcrypt.hash(req.body.password, 10);
     // To-DO: Insert username and hashed password into the 'users' table
     const query = "INSERT INTO users (username, password) VALUES ($1, $2);"
-    db.none(query, [req.body.username, hash])
+    await db.none(query, [req.body.username, hash])
     .then(() => {
+      res.status(200);
       res.redirect('/login');
     })
     .catch(err => {
-      console.log(err);
-      res.redirect('/register');
+      //console.log(err);
+      res.status(400);
+      res.render('pages/register', { message: "Username already exists!." });
     });
 });
 
 app.get('/login', (req, res) => {
+    res.status(200);
     res.render('pages/login')
 });
 
 app.post('/login', async (req, res) => {
     try {
         const query = "SELECT * FROM users WHERE username = $1;";
-        let user = await db.one(query, [req.body.username]);
-        const matching = await bcrypt.compare(req.body.password, user.password);
-        
-        if (!matching) {
-            res.render('pages/login', { message: "Incorrect username or password." });
-        } else {
-            req.session.user = user;
-            await req.session.save();
-            res.redirect('/discover');
-        }
+        const usernameHash = await bcrypt.hash(req.body.username, 10);
+        const queryFiles = "SELECT * FROM files WHERE username_hash = $1;";
+        console.log("made it here");
+        await db.one(query, [req.body.username])
+          .then(async (user) => {
+            console.log(`made it here 2 ${user}`);
+            const matching = await bcrypt.compare(req.body.password, user.password);
+            console.log(`matching is: ${matching} for ${user.username}, ${user.password} compared to ${req.body.username}, ${req.body.password}`);
+            if (!matching) {
+              console.log("No matching found");
+              res.status(400);
+              return res.render('pages/login', { message: "Incorrect password." });
+            } else {
+              console.log("Match found. Continuing...");
+              req.session.user = user;
+              req.session.save();
+              deleteFiles();
+              const files = await db.one(queryFiles, [usernameHash])
+                .then(() => {
+                  for (const file of files) {
+                    fs.writeFile(path.join(dir, file.filename), file.data, err => {
+                      if (err) {
+                        console.log(`$${file.filename} could not be written to ${dir}!`);
+                      } else {
+                        console.log(`$${file.filename} was written to ${dir}!`);
+                      }
+                    });
+                  }
+                })
+                .catch((err) => {
+                  fs.writeFile(path.join(dir, 'index.html'), sampleHTML, err => {
+                    if (err) {
+                      console.log(`index.html could not be written to ${dir}!`);
+                    } else {
+                      console.log(`index.html was written to ${dir}!`);
+                    }
+                  });
+                });
+              res.status(200);
+              res.redirect('/messageBoard');
+            }
+          })
+          .catch(err => {
+            console.log(`No users found of ${err}!`);
+            res.status(400);
+            return res.render('pages/login', { message: "Incorrect username." });  
+          });
     } catch (err) {
-        console.log(err);
+        //console.log(err);
         res.render('pages/login', { message: "A server error occurred." });
     }
 });
 
-app.get('/welcome', (req, res) => {
-    res.json({status: 'success', message: 'Welcome!'});
+app.post('/save', async (req, res) => {
+    try {
+      const queryDel = 'DELETE FROM files WHERE username_hash = $1;';
+      const queryIns = 'INSERT INTO files (username_hash, filename, data) VALUES ($1, $2, $3);';
+      const usernameHash = await bcrypt.hash(req.session.user.username, 10);
+      await db.one(queryDel, [usernameHash])
+        .then(() => {
+          const worldDir = fs.opendir(dir, err => {
+            if (err) {
+              console.log(`${dir} could not be opened!`);
+            } else {
+              console.log(`${dir} was opened!`);
+            }
+            for  (const dirent of worldDir) {
+              if (dirent.isFile()) {
+                fs.readFile(path.join(dir, dirent.name), async (err, data) => {
+                  if (err) {
+                    console.log(`${dirent.name} caused an error!`);
+                  } else {
+                    console.log(data);
+                    await db.one(queryIns, [usernameHash, (dir + dirent.name), data]);  
+                    console.log(`${dirent.name} was saved!`);
+                  }
+                });
+              } else {
+                console.log(`${dir + dirent.name} is not a file`);
+              }
+            }
+            dir.close();
+        })
+        .catch((err) => {
+          console.log("No files were deleted I guess");
+          res.status(400);
+        })
+      });
+    } catch (err) {
+        //console.log(err);
+        res.render('pages/login', { message: "A server error occurred." });
+    }
 });
-
 
 // Authentication Middleware.
 const auth = (req, res, next) => {
@@ -134,21 +236,33 @@ const auth = (req, res, next) => {
     next();
 };
   
-// Authentication Required
-app.use(auth);
-
-app.get('/discover', (req, res) => {
-    
+app.get('/welcome', (req, res) => {
+  res.status(200);
+  res.json({status: 'success', message: 'Welcome!'});
 });
 
 app.get('/logout', (req, res) => {
-    req.session.destroy();
-    res.render('pages/logout', { message: "Logged out successfully" })
+  console.log(`dir is ${dir}`);
+  deleteFiles();
+  req.session.destroy();
+  res.status(200);
+  res.render('pages/logout', { message: "Logged out successfully" })
 });
 
-app.get('/welcome', (req, res) => {
-    res.json({status: 'success', message: 'Welcome!'});
+// Authentication Required
+app.use(auth);
+
+app.get('/view', (req, res) => {
+    res.render('world_files/index');
 });
+
+app.get('/myWorlds', (req, res) => {
+    if (!req.session.user) {
+      return res.redirect('/login');
+    }
+    const userHash = bcrypt.hash(req.session.user, 10);
+});
+
 
 // *****************************************************
 // <!-- Section 5 : Start Server-->

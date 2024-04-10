@@ -1,3 +1,5 @@
 node_modules
 package-lock.json
 .env
+ProjectSourceCode/views/world_files/*
+!ProjectSourceCode/views/world_files/.gitkeep
