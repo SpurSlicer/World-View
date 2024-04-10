@@ -102,7 +102,7 @@ function deleteFiles() {
 // TODO - Include your API routes here
 app.get('/', (req, res) => {
     res.status(200);
-    res.redirect('/messageBoard');
+    res.redirect('/users');
 });
 
 app.get('/register', (req, res) => {
@@ -174,7 +174,7 @@ app.post('/login', async (req, res) => {
                   });
                 });
               res.status(200);
-              res.redirect('/messageBoard');
+              res.redirect('/');
             }
           })
           .catch(err => {
@@ -253,11 +253,6 @@ app.get('/logout', (req, res) => {
 
 // Authentication Required
 app.use(auth);
-
-app.get('/messageBoard', (req, res) => {
-    res.status(200);
-    res.render('pages/messageBoard');
-});
 
 app.get('/view', (req, res) => {
     res.render('world_files/index');
