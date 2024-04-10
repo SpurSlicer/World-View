@@ -7,3 +7,13 @@ CREATE TABLE IF NOT EXISTS files (
     filename VARCHAR(50) NOT NULL,
     data TEXT
 );
+
+CREATE TABLE IF NOT EXISTS messages (
+    id SERIAL PRIMARY KEY,
+    sender_id VARCHAR(50) NOT NULL,
+    receiver_id VARCHAR(50) NOT NULL,
+    message TEXT NOT NULL,
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(username),
+    FOREIGN KEY (receiver_id) REFERENCES users(username)
+);
