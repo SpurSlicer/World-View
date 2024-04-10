@@ -266,9 +266,9 @@ app.get('/myWorlds', (req, res) => {
 // Direct Messages
 
 app.get('/users', (req, res) => {
-    const currentUserId = req.session.userId; // Ensure your session is correctly configured to get this
+    const currentUser = req.session.user.username; // Ensure your session is correctly configured to get this
 
-    db.any('SELECT username FROM users')
+    db.any('SELECT username FROM users WHERE username != $1', [currentUser])
         .then(users => {
             res.render('pages/users', { users });
         })
