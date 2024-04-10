@@ -15,7 +15,7 @@ const session = require('express-session'); // To set the session object. To sto
 const bcrypt = require('bcrypt'); //  To hash passwords
 const fs = require('fs'); // File system operations
 
-const dir = "./world_files"
+const dir = path.join("views", "world_files");
 const sampleHTML = 
   `<!DOCTYPE html>
   <html lang="en">
@@ -92,6 +92,11 @@ app.use(
 // <!-- Section 4 : API Routes -->
 // *****************************************************
 
+function deleteFiles() {
+  fs.rmSync(dir, {recursive:true});
+  fs.mkdirSync(dir, {recursive:true});
+}
+
 // TODO - Include your API routes here
 app.get('/', (req, res) => {
     res.status(200);
@@ -144,6 +149,7 @@ app.post('/login', async (req, res) => {
               console.log("Match found. Continuing...");
               req.session.user = user;
               req.session.save();
+              deleteFiles();
               const files = await db.one(queryFiles, [usernameHash])
                 .then(() => {
                   for (const file of files) {
@@ -237,22 +243,7 @@ app.get('/welcome', (req, res) => {
 
 app.get('/logout', (req, res) => {
   console.log(`dir is ${dir}`);
-  fs.rm(dir, {recursive:true}, err => {
-    if (err) {
-      console.log(`${dir} could not be deleted!`);
-    } else {
-      console.log(`${dir} deleted!`);
-    }
-    fs.mkdir(dir, {recursive:true}, (err) => {
-      if (err) {
-        console.log(`${dir} could not be remade!`);
-      } else {
-        console.log(`${dir} remade!`);
-      }
-    });
-  });
-  //fs.rmSync(dir, {recursive:true})
-  //fs.mkdirSync(dir, {recursive:true})
+  deleteFiles();
   req.session.destroy();
   res.status(200);
   res.render('pages/logout', { message: "Logged out successfully" })
@@ -262,7 +253,7 @@ app.get('/logout', (req, res) => {
 app.use(auth);
 
 app.get('/view', (req, res) => {
-    res.render((dir + 'index.js'));
+    res.render('world_files/index');
 });
 
 app.get('/myWorlds', (req, res) => {
