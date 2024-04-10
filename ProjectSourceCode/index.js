@@ -93,7 +93,9 @@ app.use(
 // *****************************************************
 
 function deleteFiles() {
-  fs.rmSync(dir, {recursive:true});
+  if (fs.existsSync(dir)) {
+    fs.rmSync(dir, {recursive:true});
+  }
   fs.mkdirSync(dir, {recursive:true});
 }
 
