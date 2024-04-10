@@ -1,0 +1,10 @@
+<ul>
+    {{#each messages}}
+    <li><strong>{{this.sender_username}}:</strong> {{this.message}} <em>{{this.timestamp}}</em></li>
+    {{/each}}
+</ul>
+
+<form action="/messages/{{receiverId}}" method="post">
+    <textarea name="message" required></textarea>
+    <button type="submit">Send Message</button>
+</form>
