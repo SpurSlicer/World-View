@@ -93,7 +93,9 @@ app.use(
 // *****************************************************
 
 function deleteFiles() {
-  fs.rmSync(dir, {recursive:true});
+  if (fs.existsSync(dir)) {
+    fs.rmSync(dir, {recursive:true});
+  }
   fs.mkdirSync(dir, {recursive:true});
 }
 
@@ -251,6 +253,11 @@ app.get('/logout', (req, res) => {
 
 // Authentication Required
 app.use(auth);
+
+app.get('/messageBoard', (req, res) => {
+    res.status(200);
+    res.render('pages/messageBoard');
+});
 
 app.get('/view', (req, res) => {
     res.render('world_files/index');
