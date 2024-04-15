@@ -70,6 +70,9 @@ app.engine('hbs', hbs.engine);
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(bodyParser.json()); // specify the usage of JSON for parsing request body.
+app.use(express.static(__dirname));
+
+
 
 // initialize session variables
 app.use(
@@ -102,7 +105,7 @@ function deleteFiles() {
 // TODO - Include your API routes here
 app.get('/', (req, res) => {
     res.status(200);
-    res.redirect('/messageBoard');
+    res.redirect('/home');
 });
 
 app.get('/register', (req, res) => {
@@ -260,14 +263,15 @@ app.get('/messageBoard', (req, res) => {
 });
 
 app.get('/view', (req, res) => {
-    res.render('world_files/index');
+    res.render('world_files/index.html');
 });
 
-app.get('/myWorlds', (req, res) => {
+app.get('/myworld', (req, res) => {
     if (!req.session.user) {
       return res.redirect('/login');
     }
-    const userHash = bcrypt.hash(req.session.user, 10);
+    res.status(200);
+    res.redirect('/myworld');
 });
 
 

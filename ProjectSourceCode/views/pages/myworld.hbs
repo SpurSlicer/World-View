@@ -1,0 +1,11 @@
+{{> filenav}}
+{{> message}}
+<form action="/save" method="POST">
+    <div class="form-group">
+        <label for="editor">Editor</label>
+        <textarea class="form-control" id="editor" name="Editor" placeholder="Enter text here..." rows="40" cols="100">{{file}}</textarea>
+    </div>
+</form>
+<button type="submit" class="btn btn-primary">Save</button>
+
+{{!-- TODO --}}
