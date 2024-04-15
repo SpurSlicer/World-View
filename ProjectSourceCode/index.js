@@ -194,7 +194,7 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.post('/save', async (req, res) => {
+app.post('/savefile', async (req, res) => {
     try {
       const queryDel = 'DELETE FROM files WHERE username_hash = $1;';
       const queryIns = 'INSERT INTO files (username_hash, filename, data) VALUES ($1, $2, $3);';
@@ -222,7 +222,7 @@ app.post('/save', async (req, res) => {
                 console.log(`${dir + dirent.name} is not a file`);
               }
             }
-            dir.close();
+            worldDir.close();
         })
         .catch((err) => {
           console.log("No files were deleted I guess");
@@ -276,10 +276,17 @@ app.get('/myworld', (req, res) => {
       res.status(400);
       return res.redirect('/login');
     }
-    const file_contents = fs.readFileSync(path.join(dir, 'index.html'));
-    console.log(file_contents);
+    const worldDir = fs.readdirSync(dir, err => {
+      if (err) {
+        console.log(`${dir} could not be opened!`);
+      } else {
+        console.log(`${dir} was read from!`);
+      }
+    });
+    console.log(worldDir);
+    const fileContents = fs.readFileSync(path.join(dir, 'index.html'));
     res.status(200);
-    res.render("pages/myworld");
+    res.render("pages/myworld", { file: fileContents.toString(), filenames: worldDir, curr: `index.html`});
 });
 
 // Direct Messages
