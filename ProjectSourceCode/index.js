@@ -271,7 +271,7 @@ app.get('/myworld', (req, res) => {
       return res.redirect('/login');
     }
     res.status(200);
-    res.redirect('/myworld');
+    res.render('pages/myworld');
 });
 
 
