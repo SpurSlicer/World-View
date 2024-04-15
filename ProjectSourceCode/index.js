@@ -16,6 +16,9 @@ const bcrypt = require('bcrypt'); //  To hash passwords
 const fs = require('fs'); // File system operations
 
 const dir = path.join("views", "world_files");
+const options = {
+  root: path.join(__dirname, 'views', 'world_files')
+};
 const sampleHTML = 
   `<!DOCTYPE html>
   <html lang="en">
@@ -70,7 +73,7 @@ app.engine('hbs', hbs.engine);
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(bodyParser.json()); // specify the usage of JSON for parsing request body.
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, 'views', 'world_files')));
 
 
 
@@ -177,7 +180,7 @@ app.post('/login', async (req, res) => {
                   });
                 });
               res.status(200);
-              res.redirect('/');
+              res.redirect('/myworld');
             }
           })
           .catch(err => {
@@ -258,14 +261,25 @@ app.get('/logout', (req, res) => {
 app.use(auth);
 
 app.get('/view', (req, res) => {
-    res.render('world_files/index.html');
+    res.status(200);
+    res.sendFile('index.html', options, (err) => {
+      if (err) {
+        console.log('Error sending file:', err);
+      } else {
+        console.log('Sent successfully');
+      }
+    });
 });
 
 app.get('/myworld', (req, res) => {
     if (!req.session.user) {
+      res.status(400);
       return res.redirect('/login');
     }
-    const userHash = bcrypt.hash(req.session.user, 10);
+    const file_contents = fs.readFileSync(path.join(dir, 'index.html'));
+    console.log(file_contents);
+    res.status(200);
+    res.render("pages/myworld");
 });
 
 // Direct Messages
