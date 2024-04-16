@@ -8,6 +8,11 @@ CREATE TABLE IF NOT EXISTS files (
     data TEXT
 );
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> homepage
 CREATE TABLE IF NOT EXISTS messages (
     id SERIAL PRIMARY KEY,
     sender_id VARCHAR(50) NOT NULL,
@@ -16,4 +21,9 @@ CREATE TABLE IF NOT EXISTS messages (
     timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (sender_id) REFERENCES users(username),
     FOREIGN KEY (receiver_id) REFERENCES users(username)
+<<<<<<< HEAD
 );
+=======
+);
+>>>>>>> main
+>>>>>>> homepage

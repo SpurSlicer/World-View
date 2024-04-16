@@ -107,7 +107,11 @@ function deleteFiles() {
 // TODO - Include your API routes here
 app.get('/', (req, res) => {
     res.status(200);
+<<<<<<< HEAD
     res.redirect('/users');
+=======
+    res.redirect('/home');
+>>>>>>> homepage
 });
 
 app.get('/register', (req, res) => {
@@ -270,6 +274,22 @@ app.get('/myWorlds', (req, res) => {
     const userHash = bcrypt.hash(req.session.user, 10);
 });
 
+<<<<<<< HEAD
+=======
+app.get('/home', async (req, res) => {
+  try {
+    
+    const query = 'SELECT users.username, files.filename FROM users LEFT JOIN files on files.username_hash = users.username;';
+    const data = await db.any(query);
+
+    res.render('pages/home', { title: 'Welcome to World View!', nodes: data });
+
+  }
+  catch (err){
+    res.render('pages/home', { message: "Error!! home"});
+  }
+});
+>>>>>>> homepage
 // Direct Messages
 
 app.get('/users', (req, res) => {
