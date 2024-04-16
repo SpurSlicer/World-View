@@ -1,0 +1,14 @@
+<ul>
+    {{#each messages}}
+    {{#ifeq sender_username ../receiver}}
+    <li style="background-color: green;"><strong>{{sender_username}}:</strong> {{message}}</li>
+    {{else}}
+    <li style="background-color: grey;"><strong>{{sender_username}}:</strong> {{message}}</li>
+    {{/ifeq}}
+    {{/each}}
+</ul>
+
+<form action="/messages/{{receiver}}" method="POST">
+    <textarea name="message" required></textarea>
+    <button type="submit">Send Message</button>
+</form>
