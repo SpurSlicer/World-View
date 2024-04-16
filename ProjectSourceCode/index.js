@@ -40,6 +40,11 @@ const hbs = handlebars.create({
   partialsDir: __dirname + '/views/partials',
 });
 
+Handlebars.registerHelper("ifeq", function (a, b, options) {
+    if (a == b) { return options.fn(this); }
+    return options.inverse(this);
+  });
+
 // database configuration
 const dbConfig = {
   host: 'db', // the database server
@@ -292,7 +297,7 @@ app.get('/messages/:username', (req, res) => {
         WHERE (sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $1)
         ORDER BY timestamp ASC`, [currentUser, messagesFrom])
         .then(messages => {
-            res.render('pages/messages', { messages, receiver: messagesFrom });
+            res.render('pages/messages', { messages, receiver: messagesFrom});
         })
         .catch(error => {
             console.log('ERROR:', error);
