@@ -1,0 +1,72 @@
+<style>
+button {
+  background: none;
+  color: inherit;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+}
+.link-like {
+  background-color: transparent !important;
+  color:rgba(0,0,0,.6) !important;
+}
+
+.link-like:hover {
+  color: rgba(0,0,0,.7) !important;
+}
+</style>
+<header>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
+      <a class="navbar-brand" href="/"></a>
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <form action="/openfile" method="POST">
+            <input class="form-control" list="directory" type="text" name="filename" placeholder="Open File...">
+            <datalist id="directory" >
+              {{#each filenames}}
+              <option value={{this}}>
+              {{/each}}
+            </datalist>
+          </form>
+        </li>
+        <li class="nav-item">
+          <form action="/uploadfile" id="upload-file" method="POST">
+            <input class="form-control" type="file" name="file" id="upload-file" onchange="javascript:this.form.submit();">
+          </form>
+        </li>
+        <li class="nav-item">
+          <button type="submit" form="save-file" class="nav-link btn-outline-light border-0 link-like">
+              Save
+          </button>
+        </li>
+        <li class="nav-item">
+          <button type="submit" form="delete-file" class="nav-link btn-outline-light border-0 link-like">
+              Delete File
+          </button>
+          <form action="/deletefile" id="delete-file" method="POST">
+            <input class="form-control" type="text" name="filename" value={{curr}} id="filename" style="display:none;">
+          </form>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/view">View</a>
+        </li>
+        <li class="nav-item" style="align-items:end;">
+            <a class="nav-link" href="/users">Exit</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</header>
+{{> message}}
+<form action="/savefile" id="save-file" method="POST">
+    <input class="form-control" type="text" name="filename" value={{curr}} id="filename" style="display:none;">
+    <div class="form-group">
+        <label for="editor">Editor: "{{curr}}"</label>
+        <textarea class="form-control" name="file" id="editor" placeholder="Enter text here..." rows="40" cols="100">{{file}}</textarea>
+    </div>
+</form>
+
+{{!-- TODO --}}
