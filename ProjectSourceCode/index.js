@@ -117,14 +117,22 @@ function deleteFiles() {
 }
 
 // TODO - Include your API routes here
-app.get('/', (req, res) => {
-    res.status(200);
-    res.redirect('/home');
-});
+app.get('/', async (req, res) => {
+  try {
+    
+    const query = 'SELECT users.username, files.filename FROM users LEFT JOIN files on files.username = users.username;';
+    const data = await db.any(query);
+
+    res.render('pages/home', { title: 'Welcome to World View!', nodes: data, username: (req.session.user) ? req.session.user.username : `` });
+
+  }
+  catch (err){
+    res.render('pages/home', { message: "Error!! home", username: (req.session.user) ? req.session.user.username : ``});
+  }});
 
 app.get('/register', (req, res) => {
   res.status(200);
-  res.render('pages/register', {username: req.session.user.username})
+  res.render('pages/register');
 });
 
 app.post('/register', async (req, res) => {
@@ -140,13 +148,13 @@ app.post('/register', async (req, res) => {
     .catch(err => {
       //console.log(err);
       res.status(400);
-      res.render('pages/register', { message: "Username already exists!.", username: req.session.user.username });
+      res.render('pages/register', { message: "Username already exists!." });
     });
 });
 
 app.get('/login', (req, res) => {
     res.status(200);
-    res.render('pages/login', {username: req.session.user.username})
+    res.render('pages/login');
 });
 
 app.post('/login', async (req, res) => {
@@ -161,7 +169,7 @@ app.post('/login', async (req, res) => {
             if (!matching) {
               console.log("No matching found");
               res.status(400);
-              return res.render('pages/login', { message: "Incorrect password.", username: req.session.user.username });
+              return res.render('pages/login', { message: "Incorrect password."});
             } else {
               console.log("Match found. Continuing...");
               req.session.user = user;
@@ -195,7 +203,7 @@ app.post('/login', async (req, res) => {
                 .catch((err) => {
                   console.log(`Unexpected db error ${err}!`);
                   res.status(400);
-                  return res.render('pages/login', { message: "Unexpected db error.", username: req.session.user.username});        
+                  return res.render('pages/login', { message: "Unexpected db error."});        
                 });
               res.status(200);
               res.redirect('/myworld');
@@ -204,11 +212,11 @@ app.post('/login', async (req, res) => {
           .catch(err => {
             console.log(`No users found of ${err}!`);
             res.status(400);
-            return res.render('pages/login', { message: "Incorrect username.", username: req.session.user.username });  
+            return res.render('pages/login', { message: "Incorrect username."});  
           });
     } catch (err) {
         //console.log(err);
-        res.render('pages/login', { message: "A server error occurred.", username: req.session.user.username });
+        res.render('pages/login', { message: "A server error occurred."});
     }
 });
 
@@ -232,7 +240,7 @@ app.get('/logout', (req, res) => {
   deleteFiles();
   req.session.destroy();
   res.status(200);
-  res.render('pages/logout', { message: "Logged out successfully", username: req.session.user.username })
+  res.render('pages/logout', { message: "Logged out successfully" })
 });
 
 app.get('/test', async (req, res) => {
@@ -264,11 +272,11 @@ app.get('/home', async (req, res) => {
     const query = 'SELECT users.username, files.filename FROM users LEFT JOIN files on files.username = users.username;';
     const data = await db.any(query);
 
-    res.render('pages/home', { title: 'Welcome to World View!', nodes: data });
+    res.render('pages/home', { title: 'Welcome to World View!', nodes: data, username: (req.session.user) ? req.session.user.username : `` });
 
   }
   catch (err){
-    res.render('pages/home', { message: "Error!! home"});
+    res.render('pages/home', { message: "Error!! home", username: (req.session.user) ? req.session.user.username : ``});
   }
 });
 
@@ -314,7 +322,6 @@ app.get('/myworld', (req, res) => {
     const fileContents = fs.readFileSync(path.join(dir, req.session.url));
     res.status(200);
     res.render("pages/myworld", { file: fileContents.toString(), filenames: worldDir, curr: req.session.url, username: req.session.user.username});
-    res.render("pages/myworld", { file: fileContents.toString(), filenames: worldDir, curr: req.session.url, username: req.session.user.username});
 });
 
 app.post('/savefile', async (req, res) => {
@@ -353,7 +360,7 @@ app.post('/savefile', async (req, res) => {
       });
   } catch (err) {
       console.log(err);
-      res.render('pages/login', { message: "A server error occurred.", username: req.session.user.username });
+      res.render('pages/myworld', { message: "A server error occurred.", username: req.session.user.username });
   }
 });
 
@@ -374,7 +381,7 @@ app.post('/deletefile', async (req, res) => {
       });
   } catch (err) {
     console.log(err);
-    res.render('pages/login', { message: "A server error occurred.", username: req.session.user.username });
+    res.render('pages/myworld', { message: "A server error occurred.", username: req.session.user.username });
   }
 });
 
@@ -385,7 +392,7 @@ app.post('/openfile', async (req, res) => {
     res.redirect("/myworld");
   } catch (err) {
     console.log(err);
-    res.render('pages/login', { message: "A server error occurred.", username: req.session.user.username });
+    res.render('pages/myworld', { message: "A server error occurred.", username: req.session.user.username });
   }
 })
 
@@ -405,23 +412,10 @@ app.post('/newfile', async (req, res) => {
     res.redirect('/myworld');
   } catch (err) {
     console.log(err);
-    res.render('pages/login', { message: "A server error occurred." });
+    res.render('pages/myworld', { message: "A server error occurred.", username: req.session.user.username });
   }
 });
 
-app.get('/home', async (req, res) => {
-  try {
-    
-    const query = 'SELECT users.username, files.filename FROM users LEFT JOIN files on files.username = users.username;';
-    const data = await db.any(query);
-
-    res.render('pages/home', { title: 'Welcome to World View!', nodes: data, username: req.session.user.username});
-
-  }
-  catch (err){
-    res.render('pages/home', { message: "Error!! home", username: req.session.user.username});
-  }
-});
 // Direct Messages
 
 app.get('/users', (req, res) => {
