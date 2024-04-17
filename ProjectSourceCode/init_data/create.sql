@@ -4,8 +4,8 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS files (
-    username_hash VARCHAR(50) NOT NULL,
-    filename VARCHAR(50) NOT NULL,
+    username VARCHAR(60) NOT NULL,
+    filename VARCHAR(100) NOT NULL,
     data TEXT
 );
 

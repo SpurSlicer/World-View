@@ -62,10 +62,10 @@ button {
 </header>
 {{> message}}
 <form action="/savefile" id="save-file" method="POST">
+    <input class="form-control" type="text" name="filename" value={{curr}} id="filename" style="display:none;">
     <div class="form-group">
         <label for="editor">Editor: "{{curr}}"</label>
-        <input class="form-control" type="text" name="file-content" id="file-content" style="display:none;">
-        <textarea class="form-control" id="editor" placeholder="Enter text here..." rows="40" cols="100">{{file}}</textarea>
+        <textarea class="form-control" name="file" id="editor" placeholder="Enter text here..." rows="40" cols="100">{{file}}</textarea>
     </div>
 </form>
 

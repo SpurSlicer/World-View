@@ -14,6 +14,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session'); // To set the session object. To store or access session data, use the `req.session`, which is (generally) serialized as JSON by the store.
 const bcrypt = require('bcrypt'); //  To hash passwords
 const fs = require('fs'); // File system operations
+const url = require('url');
 
 const dir = path.join("views", "world_files");
 const options = {
@@ -141,12 +142,10 @@ app.get('/login', (req, res) => {
 app.post('/login', async (req, res) => {
     try {
         const query = "SELECT * FROM users WHERE username = $1;";
-        const usernameHash = await bcrypt.hash(req.body.username, 10);
-        const queryFiles = "SELECT * FROM files WHERE username_hash = $1;";
+        const queryFiles = "SELECT * FROM files WHERE username = $1;";
         console.log("made it here");
         await db.one(query, [req.body.username])
           .then(async (user) => {
-            console.log(`made it here 2 ${user}`);
             const matching = await bcrypt.compare(req.body.password, user.password);
             console.log(`matching is: ${matching} for ${user.username}, ${user.password} compared to ${req.body.username}, ${req.body.password}`);
             if (!matching) {
@@ -156,28 +155,37 @@ app.post('/login', async (req, res) => {
             } else {
               console.log("Match found. Continuing...");
               req.session.user = user;
+              req.session.url = `index.html`;
               req.session.save();
               deleteFiles();
-              const files = await db.one(queryFiles, [usernameHash])
-                .then(() => {
-                  for (const file of files) {
-                    fs.writeFile(path.join(dir, file.filename), file.data, err => {
+              await db.any(queryFiles, [req.body.username])
+                .then((files) => {
+                  if (files.length > 0) {
+                    console.log(`FILES FOUND:`, files, files.length);
+                    for (const file of files) {
+                      fs.writeFile(path.join(dir, file.filename), file.data, err => {
+                        if (err) {
+                          console.log(`$${file.filename} could not be written to ${dir}!`);
+                        } else {
+                          console.log(`$${file.filename} was written to ${dir}!`);
+                        }
+                      });
+                    }
+                  } else {
+                    console.log(`NO FILES FOUND!`);
+                    fs.writeFile(path.join(dir, 'index.html'), sampleHTML, err => {
                       if (err) {
-                        console.log(`$${file.filename} could not be written to ${dir}!`);
+                        console.log(`index.html could not be written to ${dir}!`);
                       } else {
-                        console.log(`$${file.filename} was written to ${dir}!`);
+                        console.log(`index.html was written to ${dir}!`);
                       }
                     });
                   }
                 })
                 .catch((err) => {
-                  fs.writeFile(path.join(dir, 'index.html'), sampleHTML, err => {
-                    if (err) {
-                      console.log(`index.html could not be written to ${dir}!`);
-                    } else {
-                      console.log(`index.html was written to ${dir}!`);
-                    }
-                  });
+                  console.log(`Unexpected db error ${err}!`);
+                  res.status(400);
+                  return res.render('pages/login', { message: "Unexpected db error." });        
                 });
               res.status(200);
               res.redirect('/myworld');
@@ -194,46 +202,6 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.post('/savefile', async (req, res) => {
-    try {
-      const queryDel = 'DELETE FROM files WHERE username_hash = $1;';
-      const queryIns = 'INSERT INTO files (username_hash, filename, data) VALUES ($1, $2, $3);';
-      const usernameHash = await bcrypt.hash(req.session.user.username, 10);
-      await db.one(queryDel, [usernameHash])
-        .then(() => {
-          const worldDir = fs.opendir(dir, err => {
-            if (err) {
-              console.log(`${dir} could not be opened!`);
-            } else {
-              console.log(`${dir} was opened!`);
-            }
-            for  (const dirent of worldDir) {
-              if (dirent.isFile()) {
-                fs.readFile(path.join(dir, dirent.name), async (err, data) => {
-                  if (err) {
-                    console.log(`${dirent.name} caused an error!`);
-                  } else {
-                    console.log(data);
-                    await db.one(queryIns, [usernameHash, (dir + dirent.name), data]);  
-                    console.log(`${dirent.name} was saved!`);
-                  }
-                });
-              } else {
-                console.log(`${dir + dirent.name} is not a file`);
-              }
-            }
-            worldDir.close();
-        })
-        .catch((err) => {
-          console.log("No files were deleted I guess");
-          res.status(400);
-        })
-      });
-    } catch (err) {
-        //console.log(err);
-        res.render('pages/login', { message: "A server error occurred." });
-    }
-});
 
 // Authentication Middleware.
 const auth = (req, res, next) => {
@@ -255,6 +223,29 @@ app.get('/logout', (req, res) => {
   req.session.destroy();
   res.status(200);
   res.render('pages/logout', { message: "Logged out successfully" })
+});
+
+app.get('/test', async (req, res) => {
+  const query1 = `SELECT * FROM users`;
+  const query2 = `SELECT * FROM files`;
+  console.log(`URL:`, req.session.url);
+  await db.any(query1)
+    .then((users) => {
+      console.log("USERS");
+      console.log(users);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  await db.any(query2)
+    .then((files) => {
+      console.log("FILES");
+      console.log(files);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  res.redirect('/myworld');
 });
 
 // Authentication Required
@@ -284,11 +275,95 @@ app.get('/myworld', (req, res) => {
         console.log(`${dir} was read from!`);
       }
     });
-    console.log(worldDir);
-    const fileContents = fs.readFileSync(path.join(dir, 'index.html'));
+    if (worldDir.length === 0) {
+      console.log(`Directory is empty! Making template...`);
+      fs.writeFileSync(path.join(dir, 'index.html'), sampleHTML, err => {
+        if (err) {
+          console.log(`index.html could not be written to ${dir}!`);
+        } else {
+          console.log(`index.html was written to ${dir}!`);
+        }
+      });
+      req.session.url = `index.html`;
+    }
+    if (!fs.existsSync(path.join(dir, req.session.url))) req.session.url = `index.html`;
+    const fileContents = fs.readFileSync(path.join(dir, req.session.url));
     res.status(200);
     res.render("pages/myworld", { file: fileContents.toString(), filenames: worldDir, curr: `index.html`});
 });
+
+app.post('/savefile', async (req, res) => {
+  try {
+    const queryInsert = `INSERT INTO files (username, filename, data)
+                        VALUES ($1, $2, $3);`;
+    const queryUpdate = `UPDATE files SET data = $3 WHERE username = $1 AND filename = $2 RETURNING username;`;
+    await db.one(queryUpdate, [req.session.user.username, req.body.filename, req.body.file])
+      .then((r) => {
+        console.log(`SAVE: ATTEMPTING UPDATE`)
+        fs.writeFileSync(path.join(dir, req.body.filename), req.body.file, (err) => {
+          if (err) console.log(`could not write ${req.body.filename}`);
+          else console.log(`wrote ${req.body.filename} successfully`);
+        });
+        res.status(200);
+        res.render("pages/myworld", {message: `${req.body.filename} saved successfully!`});
+      })
+      .catch(async (err) => {
+        //console.log(err);
+        console.log("SAVE: ATTEMPTING INSERT");
+        await db.none(queryInsert, [req.session.user.username, req.body.filename, req.body.file])
+          .then(() => {
+            fs.writeFileSync(path.join(dir, req.body.filename), req.body.file, (err) => {
+              if (err) console.log(`could not write ${req.filename}`);
+              else console.log(`wrote ${req.body.filename} successfully`);
+            });
+            res.status(200);
+            res.render("pages/myworld", {message: `${req.body.filename} saved successfully!`});
+          })
+          .catch((err) => {
+            console.log(err);
+            console.log("in error block :(");
+            res.status(400);
+            res.render("pages/myworld", {message: `error in saving ${req.body.filename}!`});    
+          });
+      });
+  } catch (err) {
+      console.log(err);
+      res.render('pages/login', { message: "A server error occurred." });
+  }
+});
+
+app.post('/deletefile', async (req, res) => {
+  try {
+    const query = `DELETE FROM files WHERE username = $1 AND filename = $2;`;
+    console.log(req.body.filename);
+    await db.none(query, [req.session.user.username, req.body.filename])
+      .then(() => {
+        fs.rmSync(path.join(dir, req.body.filename));
+        res.status(200);
+        res.render('pages/myworld', { message: `${req.body.filename} Deleted from database!`});
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(400);
+        res.render('pages/myworld', { message: `Could not delete ${req.body.filename}; is it saved?`});
+      });
+  } catch (err) {
+    console.log(err);
+    res.render('pages/login', { message: "A server error occurred." });
+  }
+});
+
+app.post('/openfile', async (req, res) => {
+  try {
+    console.log(req.body.filename);
+    req.session.url = req.body.filename;
+    res.redirect("/myworld");
+  } catch (err) {
+    console.log(err);
+    res.render('pages/login', { message: "A server error occurred." });
+  }
+})
+
 
 // Direct Messages
 
