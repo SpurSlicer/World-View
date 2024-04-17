@@ -1,19 +1,20 @@
-<div class="dropup dropup position-fixed bottom-0 end-0 pb-5">
+<div class="dropup position-fixed bottom-0 end-0 pb-5 pe-2">
     <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
         Friends List
     </button>
-    <ul class="dropdown-menu overflow-auto px-2" style="max-height: 200px;">
-        <input [(ngModel)]="search" placeholder="Search friends..." class="">
-        <ul>
-            <li *ngFor="let friend of friends | filter:search">
-                <a href="a user's world">{{ friend }}</a>
-                <a href="a user's world">Friend 1</a>
-                <a href="a user's world">Friend 1</a>
-                <a href="a user's world">Friend 1</a>
-                <a href="a user's world">Friend 1</a>
-                <a href="a user's world">Friend 1</a>
-                <a href="a user's world">Friend 1</a>
-            </li>
+    <div class="dropdown-menu overflow-auto px-2" style="max-height: 200px;">
+        <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+        {{#each friends}}
+        <a href="friend's world">{{friend}}</a>
+        {{/each}}
+        <a href="friend's world" class="dropdown-item">friend</a>
+        <a href="friend's world" class="dropdown-item">friend</a>
+        <a href="friend's world" class="dropdown-item">friend</a>
+        <a href="friend's world" class="dropdown-item">friend</a>
+        <a href="friend's world" class="dropdown-item">friend</a>
+        <a href="friend's world" class="dropdown-item">friend</a>
+        <a href="friend's world" class="dropdown-item">friend</a>
+        <a href="friend's world" class="dropdown-item">friend</a>
         </ul>
-    </ul>
+    </div>
 </div>

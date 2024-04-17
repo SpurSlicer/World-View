@@ -17,3 +17,9 @@ CREATE TABLE IF NOT EXISTS messages (
     FOREIGN KEY (sender_id) REFERENCES users(username),
     FOREIGN KEY (receiver_id) REFERENCES users(username)
 );
+
+CREATE TABLE IF NOT EXISTS friends (
+    id SERIAL PRIMARY KEY,
+    friend_user VARCHAR(50) NOT NULL,
+    FOREIGN KEY (friend_user) REFERENCES users(username)
+)
