@@ -1,5 +1,18 @@
-<ul>
-    {{#each users}}
-    <li><a href="/messages/{{username}}">{{username}}</a></li>
-    {{/each}}
-</ul>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <ul class="list-unstyled">
+                {{#each users}}
+                    <li class="card profile-card">
+                        <a href="/messages/{{username}}" class="d-flex align-items-center p-2">
+                        <div class="profile-img"></div>
+                        <div class="ms-3">
+                            <h5 class="card-title mb-0">{{username}}</h5>
+                        </div>
+                        </a>
+                    </li>
+                {{/each}}
+            </ul>
+        </div>
+    </div>
+</div>
