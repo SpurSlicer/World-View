@@ -119,7 +119,7 @@ function deleteFiles() {
 // TODO - Include your API routes here
 app.get('/', (req, res) => {
     res.status(200);
-    res.redirect('/home');
+    res.redirect('/login');
 });
 
 app.get('/register', (req, res) => {
@@ -390,7 +390,7 @@ app.post('/newfile', async (req, res) => {
     res.redirect('/myworld');
   } catch (err) {
     console.log(err);
-    res.render('pages/login', { message: "A server error occurred." });
+    res.render('pages/login', { message: "A server error occurred.", username: req.session.user.username });
   }
 });
 
