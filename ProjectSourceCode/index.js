@@ -101,13 +101,13 @@ function deleteFiles() {
 
 // TODO - Include your API routes here
 app.get('/', (req, res) => {
-    res.status(200);
+    // res.status(200);
     res.redirect('/messageBoard');
 });
 
 app.get('/register', (req, res) => {
-  res.status(200);
-  res.render('pages/register')
+  // res.status(200);
+  res.render('pages/register');
 });
 
 app.post('/register', async (req, res) => {

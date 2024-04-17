@@ -1,28 +1,90 @@
-<div class="container"></div>
-    <form action="/register" method="POST">
-    <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" class="form-control" id="username" name="username">
-        <label for="password">Password</label>
-        <input type="password" class="form-control" id="password" name="password">
-    </div>
-    <button type="submit" class="btn btn-primary">Register</button>
-    <p>Already have an account? <a href="/login">Login</a></p>
-    </form>
-</div>
 
-    <button class="popup" onclick="PopUp()">Click me!
-  <span class="popuptext" id="myPopup">Popup text...</span>
-</button>
-{{> footer}}
+<!--this does not seem to be interacting with style.css 
+div class="popup" id="popup1">
+        <div class = "overlay"></div>
+        <div class ="content">
+            <div class="close-btn" onclick="PopUp()">I have read and agree to the terms of service</div>
+            <h1>Disclaimer</h1>
+            <p> This is a disclaimer temp</p>
+        </div>
+    </div>
+    -->
+
+    <div class="container">
+        <form action="/register" method="POST">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" name="username">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" name="password">
+        </div>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Register</button> <!-- if this is submit it does not show the popup I could try onload activation of log in page-->
+        <p>Already have an account? <a href="/login">Login</a></p>
+
+        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Disclaimer and terms of service</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                <div class="modal-body">
+                    <p>World View is not responcable for the protection of your intelectual property.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">I understand and agree</button>  <!-- this does not submit -->
+           <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Understood</button> -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+        </form>
+
+    </div>       
+
+    <!--Where do I put this I have tried multipule places
+    const myModal = document.getElementById('myModal')
+const myInput = document.getElementById('myInput')
+
+myModal.addEventListener('shown.bs.modal', () => {
+  myInput.focus()
+})
+     -->
+
+    <!-- Button trigger modal 
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+    Launch static backdrop modal
+    </button> -->
+
+    <!-- Modal 
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h1 class="modal-title fs-5" id="staticBackdropLabel">Disclaimer and terms of service</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <p>World View is not responcable for the protection of your intelectual property.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">I understand and agree</button>  <!-- this does not submit -->
+           <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Understood</button> 
+        </div>
+        </div>
+    </div>
+    </div>
 
 <!-- office hour questions:
-1: pop up for disclaimer (event handler hbs) script tags look back at lab 4 (make it a partial)
 2: Why is header not open?
 4: where are the relase notes??? 
 5: What else can I do? I initially spent a lot of time watching youtube viedos to figure out how to make a message board but now 
 6: do world editor ... button to create worlds, tag editor. (carasel card for the file editors (rendered html and pure html))
 update story changes
+communicate with gregory
 
 make sure log out is not an option on the nav bar if you havent even registered yet
 -->
