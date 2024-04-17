@@ -260,6 +260,7 @@ app.get('/logout', (req, res) => {
 // Authentication Required
 app.use(auth);
 
+// Maybe use an iframe for this 👀👀
 app.get('/view', (req, res) => {
     res.status(200);
     res.sendFile('index.html', options, (err) => {
