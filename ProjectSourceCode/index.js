@@ -258,6 +258,20 @@ app.get('/test', async (req, res) => {
   res.redirect('/myworld');
 });
 
+app.get('/home', async (req, res) => {
+  try {
+    
+    const query = 'SELECT users.username, files.filename FROM users LEFT JOIN files on files.username = users.username;';
+    const data = await db.any(query);
+
+    res.render('pages/home', { title: 'Welcome to World View!', nodes: data });
+
+  }
+  catch (err){
+    res.render('pages/home', { message: "Error!! home"});
+  }
+});
+
 // Authentication Required
 app.use(auth);
 
@@ -299,7 +313,7 @@ app.get('/myworld', (req, res) => {
     if (!fs.existsSync(path.join(dir, req.session.url))) req.session.url = `index.html`;
     const fileContents = fs.readFileSync(path.join(dir, req.session.url));
     res.status(200);
-    res.render("pages/myworld", { file: fileContents.toString(), filenames: worldDir, curr: req.session.url});
+    res.render("pages/myworld", { file: fileContents.toString(), filenames: worldDir, curr: req.session.url, username: req.session.user.username});
 });
 
 app.post('/savefile', async (req, res) => {
@@ -394,19 +408,6 @@ app.post('/newfile', async (req, res) => {
   }
 });
 
-app.get('/home', async (req, res) => {
-  try {
-    
-    const query = 'SELECT users.username, files.filename FROM users LEFT JOIN files on files.username = users.username;';
-    const data = await db.any(query);
-
-    res.render('pages/home', { title: 'Welcome to World View!', nodes: data });
-
-  }
-  catch (err){
-    res.render('pages/home', { message: "Error!! home"});
-  }
-});
 // Direct Messages
 
 app.get('/users', (req, res) => {
