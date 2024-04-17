@@ -51,6 +51,14 @@ button {
           </form>
         </li>
         <li class="nav-item">
+          <button type="submit" form="new-file" class="nav-link btn-outline-light border-0 link-like">
+              New File
+          </button>
+          <form action="/newfile" id="new-file" method="POST">
+            <input class="form-control" type="text" name="filename" id="filename" style="display:none;">
+          </form>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" href="/view">View</a>
         </li>
         <li class="nav-item" style="align-items:end;">

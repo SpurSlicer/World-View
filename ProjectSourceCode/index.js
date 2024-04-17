@@ -299,7 +299,7 @@ app.get('/myworld', (req, res) => {
     if (!fs.existsSync(path.join(dir, req.session.url))) req.session.url = `index.html`;
     const fileContents = fs.readFileSync(path.join(dir, req.session.url));
     res.status(200);
-    res.render("pages/myworld", { file: fileContents.toString(), filenames: worldDir, curr: `index.html`});
+    res.render("pages/myworld", { file: fileContents.toString(), filenames: worldDir, curr: req.session.url});
 });
 
 app.post('/savefile', async (req, res) => {
@@ -374,11 +374,30 @@ app.post('/openfile', async (req, res) => {
   }
 })
 
+app.post('/newfile', async (req, res) => {
+  try {
+    let count = 1;
+    while (fs.existsSync(path.join(dir, `newfile${count}`))) count++;
+    fs.writeFileSync(path.join(dir, `newfile${count}`), ``, err => {
+      if (err) {
+        console.log(`new file could not be written to ${dir}!`);
+      } else {
+        console.log(`new file was written to ${dir}!`);
+      }
+    });
+    req.session.url = `newfile${count}`;
+    req.session.save();
+    res.redirect('/myworld');
+  } catch (err) {
+    console.log(err);
+    res.render('pages/login', { message: "A server error occurred." });
+  }
+});
 
 app.get('/home', async (req, res) => {
   try {
     
-    const query = 'SELECT users.username, files.filename FROM users LEFT JOIN files on files.username_hash = users.username;';
+    const query = 'SELECT users.username, files.filename FROM users LEFT JOIN files on files.username = users.username;';
     const data = await db.any(query);
 
     res.render('pages/home', { title: 'Welcome to World View!', nodes: data });
