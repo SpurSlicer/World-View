@@ -306,14 +306,19 @@ app.use(auth);
 // Maybe use an iframe for this 👀👀
 app.get('/view', (req, res) => {
     res.status(200);
-    res.sendFile('index.html', options, (err) => {
-      if (err) {
-        console.log('Error sending file:', err);
-      } else {
-        console.log('Sent successfully');
-      }
-    });
+    res.render("pages/view", {title: `${req.session.user.username}'s World`, username: req.session.user.username});
 });
+
+app.get('/viewmyworld', (req, res) => {
+  res.status(200);
+  res.sendFile('index.html', options, (err) => {
+    if (err) {
+      console.log('Error sending file:', err);
+    } else {
+      console.log('Sent successfully');
+    }
+  });
+})
 
 app.get('/myworld', (req, res) => {
     if (!req.session.user) {
