@@ -6,6 +6,7 @@
 
 const express = require('express'); // To build an application server or API
 const app = express();
+const fileUpload = require('express-fileupload');
 const handlebars = require('express-handlebars');
 const Handlebars = require('handlebars');
 const path = require('path');
@@ -81,7 +82,22 @@ app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(bodyParser.json()); // specify the usage of JSON for parsing request body.
 app.use(express.static(path.join(__dirname, 'views', 'world_files')));
-
+app.use(fileUpload({
+  limits: { fileSize: 1024**3}
+}));
+app.use(bodyParser.json({limit: "500mb"}));
+app.use(bodyParser.urlencoded({
+  extended: true,
+  limit: "500mb",
+  parameterLimit: 50000
+}));
+app.use(express.json({ limit: "500mb" }));
+//app.use(express.limit("500mb"));
+app.use(express.urlencoded({ 
+  extended: true, 
+  limit: "500mb ",
+  parameterLimit: 50000
+}));
 
 
 // initialize session variables
@@ -90,12 +106,6 @@ app.use(
     secret: process.env.SESSION_SECRET,
     saveUninitialized: false,
     resave: false,
-  })
-);
-
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
   })
 );
 
@@ -111,7 +121,19 @@ function deleteFiles() {
   }
   fs.mkdirSync(dir, {recursive:true});
 }
+function messagePush(r, msg) {
+  r.messages.push(msg);
+  r.save();
+  return;
+}
 
+function messagePop(r) {
+  if (r.messages.length > 0) {
+    const m = r.messages.pop();
+    r.save();
+    return m;
+  } else return ``;
+}
 // TODO - Include your API routes here
 app.get('/', async (req, res) => {
   try {
@@ -170,6 +192,7 @@ app.post('/login', async (req, res) => {
               console.log("Match found. Continuing...");
               req.session.user = user;
               req.session.url = `index.html`;
+              req.session.messages = [];
               req.session.save();
               deleteFiles();
               await db.any(queryFiles, [req.body.username])
@@ -243,6 +266,7 @@ app.get('/test', async (req, res) => {
   const query1 = `SELECT * FROM users`;
   const query2 = `SELECT * FROM files`;
   console.log(`URL:`, req.session.url);
+  console.log(`MESSAGES:`, req.session.messages);
   await db.any(query1)
     .then((users) => {
       console.log("USERS");
@@ -303,8 +327,15 @@ app.get('/myworld', (req, res) => {
         console.log(`${dir} was read from!`);
       }
     });
-    if (worldDir.length === 0) {
-      console.log(`Directory is empty! Making template...`);
+    let flag = false;
+    for (const dirent of worldDir) {
+      if (dirent == `index.html`) {
+        flag = true;
+        break;
+      }
+    }
+    if (worldDir.length === 0 || !flag) {
+      console.log(`Making template...`);
       fs.writeFileSync(path.join(dir, 'index.html'), sampleHTML, err => {
         if (err) {
           console.log(`index.html could not be written to ${dir}!`);
@@ -316,8 +347,9 @@ app.get('/myworld', (req, res) => {
     }
     if (!fs.existsSync(path.join(dir, req.session.url))) req.session.url = `index.html`;
     const fileContents = fs.readFileSync(path.join(dir, req.session.url));
+    const m = messagePop(req.session);
     res.status(200);
-    res.render("pages/myworld", { file: fileContents.toString(), filenames: worldDir, curr: req.session.url, username: req.session.user.username});
+    res.render("pages/myworld", { file: fileContents.toString(), filenames: worldDir, curr: req.session.url, username: req.session.user.username, message: (m) ? m : ``});
 });
 
 app.post('/savefile', async (req, res) => {
@@ -325,6 +357,22 @@ app.post('/savefile', async (req, res) => {
     const queryInsert = `INSERT INTO files (username, filename, data)
                         VALUES ($1, $2, $3);`;
     const queryUpdate = `UPDATE files SET data = $3 WHERE username = $1 AND filename = $2 RETURNING username;`;
+    const queryDelete = `DELETE FROM files WHERE username = $1 AND filename = $2;`;
+    console.log(`OG FILENAME:`, req.session.url);
+    console.log(`NEW FILENAME:`, req.body.filename);
+    if (req.session.url != req.body.filename) {
+      fs.renameSync(path.join(dir, req.session.url), path.join(dir, req.body.filename));
+      await db.none(queryDelete, [req.session.user.username, req.session.url])
+        .then(() => {
+          console.log(`${req.body.filename} deleted... ready for replacement`);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      req.session.url = req.body.filename;
+      req.session.save();
+    } else console.log(`no filename change detected`);
+    //maybe add in wait for promise to be fulfilled or not
     await db.one(queryUpdate, [req.session.user.username, req.body.filename, req.body.file])
       .then((r) => {
         console.log(`SAVE: ATTEMPTING UPDATE`)
@@ -332,8 +380,9 @@ app.post('/savefile', async (req, res) => {
           if (err) console.log(`could not write ${req.body.filename}`);
           else console.log(`wrote ${req.body.filename} successfully`);
         });
+        messagePush(req.session, `${req.body.filename} saved successfully!`);
         res.status(200);
-        res.render("pages/myworld", {message: `${req.body.filename} saved successfully!`, username: req.session.user.username});
+        res.redirect("/myworld");
       })
       .catch(async (err) => {
         //console.log(err);
@@ -344,52 +393,87 @@ app.post('/savefile', async (req, res) => {
               if (err) console.log(`could not write ${req.filename}`);
               else console.log(`wrote ${req.body.filename} successfully`);
             });
+            messagePush(req.session, `${req.body.filename} saved successfully!`);
             res.status(200);
-            res.render("pages/myworld", {message: `${req.body.filename} saved successfully!`, username: req.session.user.username});
+            res.redirect("/myworld");
           })
           .catch((err) => {
             console.log(err);
             console.log("in error block :(");
+            messagePush(req.session, `error in saving ${req.body.filename}!`);
             res.status(400);
-            res.render("pages/myworld", {message: `error in saving ${req.body.filename}!`, username: req.session.user.username});    
+            res.redirect("/myworld");    
           });
       });
   } catch (err) {
       console.log(err);
-      res.render('pages/myworld', { message: "A server error occurred.", username: req.session.user.username });
+      messagePush(req.session, `A server error occurred.`);
+      res.redirect('/myworld');
   }
 });
 
 app.post('/deletefile', async (req, res) => {
   try {
     const query = `DELETE FROM files WHERE username = $1 AND filename = $2;`;
-    console.log(req.body.filename);
     await db.none(query, [req.session.user.username, req.body.filename])
       .then(() => {
+        console.log(`Deleting file`, req.body.filename);
         fs.rmSync(path.join(dir, req.body.filename));
+        req.session.url = `index.html`;
+        req.session.save();
+        messagePush(req.session, `${req.body.filename} Deleted from database!`);
         res.status(200);
-        res.render('pages/myworld', { message: `${req.body.filename} Deleted from database!`, username: req.session.user.username});
+        res.redirect('/myworld');
       })
       .catch((err) => {
         console.log(err);
+        messagePush(req.session, `Could not delete ${req.body.filename}; is it saved?!`);
         res.status(400);
-        res.render('pages/myworld', { message: `Could not delete ${req.body.filename}; is it saved?`, username: req.session.user.username});
+        res.redirect('/myworld');
       });
   } catch (err) {
     console.log(err);
-    res.render('pages/myworld', { message: "A server error occurred.", username: req.session.user.username });
-  }
+    messagePush(req.session, `A server error occurred.`);
+    res.redirect('/myworld');  }
 });
 
 app.post('/openfile', async (req, res) => {
   try {
-    console.log(req.body.filename);
+    console.log(`opening file`, req.body.filename);
     req.session.url = req.body.filename;
+    req.session.save();
     res.redirect("/myworld");
   } catch (err) {
     console.log(err);
-    res.render('pages/myworld', { message: "A server error occurred.", username: req.session.user.username });
-  }
+    messagePush(req.session, `A server error occurred.`);
+    res.redirect('/myworld');  }
+})
+
+app.post('/uploadfile', async (req, res) => {
+  try {
+    if (req.files.file.length > 1) {
+      for (const file of req.files.file) {
+        console.log(`UPLOADING FILE`, file.name);
+        fs.writeFileSync(path.join(dir, file.name), file.data, (err) => {
+          if (err) console.log(`could not upload ${file.name}`);
+          else console.log(`uploaded ${file.name} successfully`);
+        });
+      }
+    } else {
+      const file = req.files.file;
+      console.log(`UPLOADING FILE`, file.name);
+      fs.writeFileSync(path.join(dir, file.name), file.data, (err) => {
+        if (err) console.log(`could not upload ${file.name}`);
+        else console.log(`uploaded ${file.name} successfully`);
+      });
+    }
+    messagePush(req.session, `File upload completed successfully!`);
+    res.status(200);
+    res.redirect('/myworld');
+  } catch (err) {
+    console.log(err);
+    messagePush(req.session, `A server error occurred.`);
+    res.redirect('/myworld');  }
 })
 
 app.post('/newfile', async (req, res) => {
@@ -408,8 +492,8 @@ app.post('/newfile', async (req, res) => {
     res.redirect('/myworld');
   } catch (err) {
     console.log(err);
-    res.render('pages/myworld', { message: "A server error occurred.", username: req.session.user.username });
-  }
+    messagePush(req.session, `A server error occurred.`);
+    res.redirect('/myworld');  }
 });
 
 // Direct Messages
