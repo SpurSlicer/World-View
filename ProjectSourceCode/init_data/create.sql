@@ -20,11 +20,11 @@ CREATE TABLE IF NOT EXISTS messages (
 );
 
 CREATE TABLE IF NOT EXISTS friends (
-    user VARCHAR(50) NOT NULL,
-    friend VARCHAR(50) NOT NULL,
-    PRIMARY KEY (user, friend),
-    FOREIGN KEY (user) REFERENCES users(username),
-    FOREIGN KEY (friend) REFERENCES users(username)
+    user_id VARCHAR(50) NOT NULL,
+    friend_id VARCHAR(50) NOT NULL,
+    PRIMARY KEY (user_id, friend_id),
+    FOREIGN KEY (user_id) REFERENCES users(username),
+    FOREIGN KEY (friend_id) REFERENCES users(username)
 );
 
 
