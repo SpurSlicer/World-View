@@ -595,8 +595,6 @@ app.get('/messages/:username', (req, res) => {
         });
 });
 
-
-
 app.post('/messages/:username', (req, res) => {
     const sendingTo = req.params.username;
     const currentUser = req.session.user.username
@@ -611,6 +609,44 @@ app.post('/messages/:username', (req, res) => {
             res.send('Error sending message');
         });
 });
+
+// Friends
+
+// Route to display friends
+app.get('/friends', async (req, res) => {
+  const user = req.session.user.username;
+  const friends = await db.any('SELECT friend_id FROM friends WHERE user_id = $1', [user]);
+  res.render('pages/friends', { friends });
+});
+
+// Route to add a friend
+app.post('/addfriend', async (req, res) => {
+  const user = req.session.user.username;
+  const { friend } = req.body;
+  const friends = await db.any('SELECT friend_id FROM friends WHERE user_id = $1', [user]);
+  const friendExists = await db.oneOrNone('SELECT username FROM users WHERE username = $1', [friend]);
+  const alreadyFriends = await db.oneOrNone('SELECT user_id FROM friends WHERE (user_id = $1 AND friend_id = $2)', [user, friend])
+
+  if (user === friend) {
+    res.render('pages/friends', { message: "Cannot add yourself as a friend", friends });
+  } else if (!friendExists) {
+    res.render('pages/friends', { message: "This user does not exist", friends });
+  } else if (alreadyFriends) {
+    res.render('pages/friends', { message: "You are already friends with this person", friends });
+  } else {
+    await db.none('INSERT INTO friends (user_id, friend_id) VALUES ($1, $2)', [user, friend]);
+    res.redirect('/friends');
+  }
+}); 
+
+// Route to unfriend someone
+app.post('/unfriend', async (req, res) => {
+  const user = req.session.user.username;
+  const { friend } = req.body;
+  await db.none('DELETE FROM friends WHERE user_id = $1 AND friend_id = $2', [user, friend]);
+  res.redirect('/friends');
+});
+
 
 
 
