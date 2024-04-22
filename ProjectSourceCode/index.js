@@ -350,7 +350,7 @@ app.get('/view', async (req, res) => {
           res.render('pages/login', {title: `${username}'s World`, src: `/viewuserworld`, username: username});
         } else {
           res.status(404);
-          return res.render('pages/home', {message: `${username} has no world files!`, username: (req.session.user) ? req.session.user.username : `` });    
+          return res.render('pages/login', {message: `${username} has no world files!`, username: (req.session.user) ? req.session.user.username : `` });    
         }
       })
       .catch((err) => {
