@@ -3,7 +3,9 @@ CREATE TABLE IF NOT EXISTS users (
     password CHAR(60) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS files (
+
+DROP TABLE IF EXISTS files;
+CREATE TABLE files (
     username VARCHAR(60) NOT NULL,
     filename VARCHAR(100) NOT NULL,
     data TEXT
