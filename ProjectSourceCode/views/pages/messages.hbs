@@ -1,14 +1,23 @@
-<ul>
+<div class="message-container d-flex flex-column">
     {{#each messages}}
-    {{#ifeq sender_username ../receiver}}
-    <li style="background-color: green;"><strong>{{sender_username}}:</strong> {{message}}</li>
-    {{else}}
-    <li style="background-color: grey;"><strong>{{sender_username}}:</strong> {{message}}</li>
-    {{/ifeq}}
+        {{#ifeq sender_username ../receiver}}
+            <div class="text-message incoming">
+                <strong>{{sender_username}}:</strong> {{message}}
+            </div>
+        {{else}}
+            <div class="text-message outgoing">
+                <strong>{{sender_username}}:</strong> {{message}}
+            </div>
+        {{/ifeq}}
     {{/each}}
-</ul>
+</div>
 
-<form action="/messages/{{receiver}}" method="POST">
-    <textarea name="message" required></textarea>
-    <button type="submit">Send Message</button>
-</form>
+<div class="form-container">
+    <form action="/messages/{{receiver}}" method="POST">
+        <div class="mb-3">
+            <label for="message-textarea" class="form-label">Your Message</label>
+            <textarea id="message-textarea" name="message" class="form-control" required rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Send Message</button>
+    </form>
+</div>
