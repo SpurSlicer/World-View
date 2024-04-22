@@ -3,6 +3,9 @@
 <head>
     <title>{{title}}</title>
     <style>
+        body {
+            background-color: #bb764e;
+        }
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -14,21 +17,62 @@
             /* thoughtd be cute to make them circles */
             width: 150px;
             height: 150px;
-            border-radius: 50%;
+            border-radius: 100%;
             padding: 20px;
             text-align: center;
+        }
+        .text-container {
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
         }
     </style>
 </head>
 <body>
+    
     <h1>{{title}}</h1>
+    <h4>Click on any world to explore!</h4>
     <div class="grid-container">
         {{#each nodes}}
-            <div class="grid-item">
-            <p>{{this.username}}'s World</p>
-            <p>Filename: {{this.filename}}</p>
-            </div>
+            <form action="/submitusername" method="POST">
+                <input class="form-control" type="text" name="username"  value={{this.username}} style="display:none;">
+                <div class="grid-item" onclick="javascript:this.parentNode.submit()">
+                    <div class="text-container">
+                        <p>{{this.username}}'s World</p>
+                    </div>
+                </div>
+            </form>
         {{/each}}
     </div>
+
+    <script>
+    /* script for random color generator for worlds */
+    function randomColor() {
+
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+
+        for (var i = 0; i < 6; i++) {
+
+            color += letters[Math.floor(Math.random() * 16)];
+
+        }
+
+        return color;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+        var items = document.querySelectorAll('.grid-item');
+
+        items.forEach(function(item) {
+
+            item.style.backgroundColor = randomColor();
+
+        });
+    });
+    </script>
 </body>
 </html>
