@@ -331,7 +331,7 @@ app.get('/view', async (req, res) => {
       res.status(400);
       return res.render('pages/login', {message: `username sent incorrectly!`, username: (req.session.user) ? req.session.user.username : `` });    
     }
-    const queryFiles = "SELECT * FROM files WHERE username = $1;";
+    const queryFiles = "SELECT * FROM files WHERE username_hash = $1;";
     deleteFiles(userDir);
     await db.any(queryFiles, [username])
       .then((files) => {
@@ -347,10 +347,10 @@ app.get('/view', async (req, res) => {
             });
           }
           res.status(200);
-          res.render('pages/view', {title: `${username}'s World`, src: `/viewuserworld`, username: username});
+          res.render('pages/login', {title: `${username}'s World`, src: `/viewuserworld`, username: username});
         } else {
           res.status(404);
-          return res.render('pages/login', {message: `${username} has no world files!`, username: (req.session.user) ? req.session.user.username : `` });    
+          return res.render('pages/home', {message: `${username} has no world files!`, username: (req.session.user) ? req.session.user.username : `` });    
         }
       })
       .catch((err) => {
