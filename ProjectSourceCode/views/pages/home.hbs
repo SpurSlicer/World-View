@@ -1,3 +1,4 @@
+{{> message}}
 <!DOCTYPE html>
 <html>
 <head>
@@ -24,11 +25,15 @@
     <h1>{{title}}</h1>
     <div class="grid-container">
         {{#each nodes}}
-            <div class="grid-item">
-            <p>{{this.username}}'s World</p>
-            <p>Filename: {{this.filename}}</p>
-            </div>
+            <form action="/submitusername" method="POST">
+                <input class="form-control" type="text" name="username"  value={{this.username}} style="display:none;">
+                <div class="grid-item" onclick="javascript:this.parentNode.submit()">
+                    <p>{{this.username}}'s World</p>
+                    <p>Filename: {{this.filename}}</p>
+                </div>
+            </form>
         {{/each}}
     </div>
+
 </body>
 </html>

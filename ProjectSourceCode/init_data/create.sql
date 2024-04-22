@@ -19,6 +19,24 @@ CREATE TABLE IF NOT EXISTS messages (
     FOREIGN KEY (receiver_id) REFERENCES users(username)
 );
 
+CREATE TABLE IF NOT EXISTS friends (
+    user_id VARCHAR(50) NOT NULL,
+    friend_id VARCHAR(50) NOT NULL,
+    PRIMARY KEY (user_id, friend_id),
+    FOREIGN KEY (user_id) REFERENCES users(username),
+    FOREIGN KEY (friend_id) REFERENCES users(username)
+);
+
+
+CREATE TABLE IF NOT EXISTS friends (
+    user_id VARCHAR(50) NOT NULL,
+    friend_id VARCHAR(50) NOT NULL,
+    PRIMARY KEY (user_id, friend_id),
+    FOREIGN KEY (user_id) REFERENCES users(username),
+    FOREIGN KEY (friend_id) REFERENCES users(username)
+);
+
+
 CREATE TABLE IF NOT EXISTS worlds (
     world_id SERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
