@@ -1,0 +1,27 @@
+<div class="modal" id="tagmodal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Tags</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form action = "/changeTags" id = 'changeTags' method = "POST">
+        <div class="modal-body">
+            <p>Please select the tags you would like to use</p>
+            <input type="checkbox" class="btn-check" id="game" name="game" value="false" autocomplete="off">
+            <label class="btn btn-outline-primary" for="game">Game</label><br>
+            <input type="checkbox" class="btn-check" id="html" name="html" value="false" autocomplete="off">
+            <label class="btn btn-outline-primary" for="html">HTML</label><br>
+            <input type="checkbox" class="btn-check" id="css" name="css" value="false" autocomplete="off">
+            <label class="btn btn-outline-primary" for="css">CSS</label><br>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Save changes</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

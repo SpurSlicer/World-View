@@ -64,11 +64,15 @@ button {
         <li class="nav-item" style="align-items:end;">
             <a class="nav-link" href="/users">Exit</a>
         </li>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#tagmodal">
+          Change Tags
+        </button>
       </ul>
     </div>
   </nav>
 </header>
 {{> message}}
+{{> tags}}
 <form action="/savefile" id="save-file" method="POST">
     <input class="form-control" type="text" name="filename" value={{curr}} id="filename">
     <div class="form-group">

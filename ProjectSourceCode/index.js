@@ -492,6 +492,7 @@ app.post('/newfile', async (req, res) => {
         console.log(`new file was written to ${dir}!`);
       }
     });
+    makeTags(req.session.user.username);
     req.session.url = `newfile${count}`;
     req.session.save();
     res.redirect('/myworld');
@@ -553,7 +554,49 @@ app.post('/messages/:username', (req, res) => {
         });
 });
 
+function makeTags(username) {
+  tags = ""
+  query = 'INSERT INTO worlds (username, tags) VALUES ($1, $2);';
+  db.any(query, [username, tags])
+    .then(() => {
+      return true;
+    })
+    .catch(() => {
+      return false;
+    });
+}
 
+//alters the tags associated with a world id
+app.post('/changeTags', async (req, res) => {
+  tags = ""
+  if (req.body.game == true){
+    tags = tags + "game, "
+  }
+  if (req.body.html == true){
+    tags = tags + "html, "
+  }
+  if (req.body.css == true){
+    tags = tags + "css, "
+  }
+  world_id = userToWorlds(req.session.user.username);
+  query = 'UPDATE worlds SET tags = $1 WHERE world_id = $2;';
+  await db.any(query, [tags, world_id])
+    .then(() => { 
+      res.status(200);
+      res.redirect('/myworld');
+    });
+    
+});
+
+//when getTags is called uses the getTags function to return a string of all the tags associated with a world id.
+
+function userToWorlds(username) {
+  query = 'SELECT world_id FROM worlds WHERE username = $1;';
+  db.any(query, [username])
+    .then(data => {
+      return data;
+    });
+}
 
 
 // *****************************************************

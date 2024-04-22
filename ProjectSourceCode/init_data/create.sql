@@ -19,3 +19,8 @@ CREATE TABLE IF NOT EXISTS messages (
     FOREIGN KEY (receiver_id) REFERENCES users(username)
 );
 
+CREATE TABLE IF NOT EXISTS worlds (
+    world_id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    tags VARCHAR(100)
+);
