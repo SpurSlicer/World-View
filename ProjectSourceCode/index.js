@@ -295,7 +295,7 @@ app.get('/test', async (req, res) => {
 app.get('/home', async (req, res) => {
   try {
     
-    const query = 'SELECT users.username, files.filename FROM users INNER JOIN files on files.username = users.username;';
+    const query = `SELECT users.username FROM users INNER JOIN files ON files.username = users.username AND files.filename = 'index.html';`;
     const data = await db.any(query);
 
     res.render('pages/home', { title: 'Welcome to World View!', nodes: data, username: (req.session.user) ? req.session.user.username : `` });
@@ -308,6 +308,7 @@ app.get('/home', async (req, res) => {
 
 app.post('/submitusername', (req, res) => {
   res.status(200);
+  console.log(`I get here`);
   const str = encodeURIComponent(req.body.username);
   res.redirect("/view?u=" + str);
 });
@@ -347,7 +348,7 @@ app.get('/view', async (req, res) => {
             });
           }
           res.status(200);
-          res.render('pages/login', {title: `${username}'s World`, src: `/viewuserworld`, username: username});
+          res.render('pages/view', {title: `${username}'s World`, src: `/viewuserworld`, username: username});
         } else {
           res.status(404);
           return res.render('pages/login', {message: `${username} has no world files!`, username: (req.session.user) ? req.session.user.username : `` });    
