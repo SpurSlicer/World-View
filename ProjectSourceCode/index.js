@@ -230,7 +230,7 @@ app.post('/login', async (req, res) => {
                   return res.render('pages/login', { message: "Unexpected db error."});        
                 });
               res.status(200);
-              res.redirect('/myworld');
+              res.redirect('/home');
             }
           })
           .catch(err => {
@@ -617,7 +617,7 @@ app.post('/messages/:username', (req, res) => {
 app.get('/friends', async (req, res) => {
   const user = req.session.user.username;
   const friends = await db.any('SELECT friend_id FROM friends WHERE user_id = $1', [user]);
-  res.render('pages/friends', { friends });
+  res.render('pages/friends', { friends, username: req.session.user.username });
 });
 
 // Route to add a friend
@@ -629,11 +629,11 @@ app.post('/addfriend', async (req, res) => {
   const alreadyFriends = await db.oneOrNone('SELECT user_id FROM friends WHERE (user_id = $1 AND friend_id = $2)', [user, friend])
 
   if (user === friend) {
-    res.render('pages/friends', { message: "Cannot add yourself as a friend", friends });
+    res.render('pages/friends', { message: "Cannot add yourself as a friend", friends,  username: req.session.user.username});
   } else if (!friendExists) {
-    res.render('pages/friends', { message: "This user does not exist", friends });
+    res.render('pages/friends', { message: "This user does not exist", friends, username: req.session.user.username });
   } else if (alreadyFriends) {
-    res.render('pages/friends', { message: "You are already friends with this person", friends });
+    res.render('pages/friends', { message: "You are already friends with this person", friends, username: req.session.user.username });
   } else {
     await db.none('INSERT INTO friends (user_id, friend_id) VALUES ($1, $2)', [user, friend]);
     res.redirect('/friends');
