@@ -143,7 +143,7 @@ function sessionPop(r, s) {
 app.get('/', async (req, res) => {
   try {
     
-    const query = 'SELECT users.username, files.filename FROM users LEFT JOIN files on files.username = users.username;';
+    const query = `SELECT users.username FROM users INNER JOIN files ON files.username = users.username AND files.filename = 'index.html';`;
     const data = await db.any(query);
 
     res.render('pages/home', { title: 'Welcome to World View!', nodes: data, username: (req.session.user) ? req.session.user.username : `` });
@@ -151,7 +151,7 @@ app.get('/', async (req, res) => {
   }
   catch (err){
     res.render('pages/home', { message: "Error!! home", username: (req.session.user) ? req.session.user.username : ``});
-  }});
+}});
 
 app.get('/register', (req, res) => {
   res.status(200);
