@@ -308,9 +308,23 @@ app.get('/home', async (req, res) => {
 
 app.post('/submitusername', (req, res) => {
   res.status(200);
-  console.log(`I get here`);
   const str = encodeURIComponent(req.body.username);
   res.redirect("/view?u=" + str);
+});
+
+app.post('/randomsearch', async (req, res) => {
+  res.status(200);
+  const query = `SELECT users.username FROM users INNER JOIN files ON files.username = users.username AND files.filename = 'index.html';`;
+    const data = await db.any(query)
+      .then((users) => {
+        const len = users.length;
+        const ran = Math.floor(Math.random()*len);
+        console.log(`of users ${users}, ${users[ran].username} was picked`);
+        res.redirect(`/view?u=` + users[ran].username);
+      })
+      .catch((err) => {
+        console.log(`error occurred in random search! ${err}`);
+      });
 });
 
 app.get('/viewuserworld', (req, res) => {
@@ -361,7 +375,18 @@ app.get('/view', async (req, res) => {
       });
   } else {
     res.status(200);
-    res.render("pages/view", {title: `${req.session.user.username}'s World`, src: `/viewmyworld`, username: req.session.user.username});
+    if (req.session)
+      res.render("pages/view", {title: `${req.session.user.username}'s World`, src: `/viewmyworld`, username: req.session.user.username});
+    else {
+      try {
+        const query = `SELECT users.username FROM users INNER JOIN files ON files.username = users.username AND files.filename = 'index.html';`;
+        const data = await db.any(query);
+        res.render('pages/home', { message: `userbase seems to be empty!`, title: 'Welcome to World View!', nodes: data, username: (req.session.user) ? req.session.user.username : `` });
+      }
+      catch (err){
+        res.render('pages/home', { message: "Error!! home", username: (req.session.user) ? req.session.user.username : ``});
+      }
+    }
   }
 });
 
