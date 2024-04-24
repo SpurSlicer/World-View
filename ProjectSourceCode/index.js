@@ -137,9 +137,23 @@ function messagePop(r) {
 // TODO - Include your API routes here
 
 app.get('/discover', (req, res) => {
-  res.status(200);
-  res.render('pages/discover')
+  db.any("SELECT * FROM files;")
+  .then(files => {
+      console.log(files)
+      res.render('pages/discover', {
+        files,
+        action: 'view',
+      });
+  })
+  .catch(err => {
+      res.render('pages/courses', {
+        files: [],
+        error: true,
+        message: err.message,
+      });
+    });
 });
+
 
 
 app.get('/', async (req, res) => {

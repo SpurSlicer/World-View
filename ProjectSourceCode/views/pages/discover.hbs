@@ -11,11 +11,11 @@
         </tr>
     </thead>
     <tbody>
-        {{#each worlds}} <!-- can I pile on if statments here for the tags, also where can I find this ? -->
+        {{#each files}} <!-- can I pile on if statments here for the tags, also where can I find this ? -->
         <tr>
-            <td>{{this.world_name}}</td>
-            <td>{{this.world_owner}}</td>
-            <td>{{this.world_tags}}</td>
+            <td>{{this.username}}</td>
+            <td>{{this.filename}}</td>
+            <!-- <td>{{this.world_tags}}</td> -->
             <td>
                 <form method="GET" action="/view">
                 <!-- app.get('/view', (req, res) => {
