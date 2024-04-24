@@ -142,17 +142,16 @@ function sessionPop(r, s) {
 
 // TODO - Include your API routes here
 app.get('/', async (req, res) => {
-  try {
-    
-    const query = `SELECT users.username FROM users INNER JOIN files ON files.username = users.username AND files.filename = 'index.html';`;
-    const data = await db.any(query);
-
+  const query = `SELECT users.username, files.tags FROM users INNER JOIN files ON files.username = users.username AND files.filename = 'index.html';`;
+  await db.any(query)
+  .then((data) => {
+    console.log(data);
     res.render('pages/home', { title: 'Welcome to World View!', nodes: data, username: (req.session.user) ? req.session.user.username : `` });
-
-  }
-  catch (err){
+  })
+  .catch ((err) => {
     res.render('pages/home', { message: "Error!! home", username: (req.session.user) ? req.session.user.username : ``});
-}});
+  })
+});
 
 app.get('/register', (req, res) => {
   res.status(200);
@@ -378,9 +377,14 @@ app.get('/view', async (req, res) => {
       res.render("pages/view", {title: `${req.session.user.username}'s World`, src: `/viewmyworld`, username: req.session.user.username});
     else {
       try {
-        const query = `SELECT users.username FROM users INNER JOIN files ON files.username = users.username AND files.filename = 'index.html';`;
-        const data = await db.any(query);
-        res.render('pages/home', { message: `userbase seems to be empty!`, title: 'Welcome to World View!', nodes: data, username: (req.session.user) ? req.session.user.username : `` });
+        const query = `SELECT users.username, files.tags FROM users INNER JOIN files ON files.username = users.username AND files.filename = 'index.html';`;
+        await db.any(query)
+        .then((data) => {
+          res.render('pages/home', { message: `userbase seems to be empty!`, title: 'Welcome to World View!', nodes: data, username: (req.session.user) ? req.session.user.username : `` });
+        })
+        .catch ((err) => {
+          res.render('pages/home', { message: "Error!! home", username: (req.session.user) ? req.session.user.username : ``});
+        })
       }
       catch (err){
         res.render('pages/home', { message: "Error!! home", username: (req.session.user) ? req.session.user.username : ``});
