@@ -147,17 +147,69 @@ app.get('/discover', (req, res) => {
       console.log(files)
       res.render('pages/discover', {
         files,
-        action: 'view',
+        action: 'view', // change action to submitusername ???
       });
   })
   .catch(err => {
-      res.render('pages/courses', {
+      res.render('pages/discover', {
         files: [],
         error: true,
         message: err.message,
       });
     });
 });
+app.get('/dhtml', (req, res) => {
+  db.any("SELECT * FROM files WHERE tag = 'HTML';") 
+  .then(files => {
+      console.log(files)
+      res.render('pages/dhtml', {
+        files,
+        action: 'view',
+      });
+  })
+  .catch(err => {
+      res.render('pages/dhtml', {
+        files: [],
+        error: true,
+        message: err.message,
+      });
+    });
+});
+app.get('/dcss', (req, res) => {
+  db.any("SELECT * FROM files WHERE tag = 'CSS';") 
+  .then(files => {
+      console.log(files)
+      res.render('pages/dcss', {
+        files,
+        action: 'view',
+      });
+  })
+  .catch(err => {
+      res.render('pages/dcss', {
+        files: [],
+        error: true,
+        message: err.message,
+      });
+    });
+});
+app.get('/dgame', (req, res) => {
+  db.any("SELECT * FROM files WHERE tag = 'Game';") 
+  .then(files => {
+      console.log(files)
+      res.render('pages/dgame', {
+        files,
+        action: 'view',
+      });
+  })
+  .catch(err => {
+      res.render('pages/dgame', {
+        files: [],
+        error: true,
+        message: err.message,
+      });
+    });
+});
+
 
 
 

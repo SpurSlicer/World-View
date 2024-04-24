@@ -8,7 +8,7 @@
             <!-- see how this style looks and possible change -->
             <th style="color:#68AB77; background-color:aqua">World Name</th>
             <th style="color:#68AB77; background-color:aqua">World Creator</th>
-            <th style="color:#68AB77; background-color:aqua">World Tags</th> <!-- Whatever other aspects should be displayed -->
+            <th style="color:#68AB77; background-color:aqua">World Tag</th> <!-- Whatever other aspects should be displayed -->
             <th style="color:#68AB77; background-color:aqua">Visit</th>
         </tr>
     </thead>
@@ -17,12 +17,16 @@
         <tr>
             <td style="color:aqua; background-color:#68AB77">{{this.username}}</td>
             <td style="color:aqua; background-color:#68AB77">{{this.filename}}</td>
-            <!-- <td>{{this.world_tags}}</td> -->
+            <td style="color:aqua; background-color:#68AB77">{{this.tag}}</td>
             <td>
-                <form method="GET" action="/view">
-                <!-- app.get('/view', (req, res) => {
+                <form action="/submitusername" method="POST">
+                <input class="form-control" type="text" name="username"  value={{this.username}} style="display:none;">
+                <!-- <div class="grid-item" onclick="javascript:this.parentNode.submit()">
+                app.get('/view', (req, res) => {
     res.render('world_files/index');
-}); -->
+}); 
+LOOK at home
+-->
                     <button type="submit" >Visit</button> 
                 </form>
             </td>

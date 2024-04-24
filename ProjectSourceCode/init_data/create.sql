@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS files (
     username VARCHAR(60) NOT NULL,
     filename VARCHAR(100) NOT NULL,
+    tag VARCHAR(100),
     data TEXT
 );
 
