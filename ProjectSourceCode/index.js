@@ -144,7 +144,7 @@ function sessionPop(r, s) {
 app.get('/', async (req, res) => {
   try {
     
-    const query = 'SELECT users.username, files.filename FROM users LEFT JOIN files on files.username = users.username;';
+    const query = `SELECT users.username FROM users INNER JOIN files ON files.username = users.username AND files.filename = 'index.html';`;
     const data = await db.any(query);
 
     res.render('pages/home', { title: 'Welcome to World View!', nodes: data, username: (req.session.user) ? req.session.user.username : `` });
@@ -152,7 +152,7 @@ app.get('/', async (req, res) => {
   }
   catch (err){
     res.render('pages/home', { message: "Error!! home", username: (req.session.user) ? req.session.user.username : ``});
-  }});
+}});
 
 app.get('/register', (req, res) => {
   res.status(200);
@@ -231,7 +231,7 @@ app.post('/login', async (req, res) => {
                   return res.render('pages/login', { message: "Unexpected db error."});        
                 });
               res.status(200);
-              res.redirect('/myworld');
+              res.redirect('/home');
             }
           })
           .catch(err => {
@@ -296,7 +296,7 @@ app.get('/test', async (req, res) => {
 app.get('/home', async (req, res) => {
   try {
     
-    const query = 'SELECT users.username, files.filename FROM users LEFT JOIN files on files.username = users.username;';
+    const query = `SELECT users.username FROM users INNER JOIN files ON files.username = users.username AND files.filename = 'index.html';`;
     const data = await db.any(query);
 
     res.render('pages/home', { title: 'Welcome to World View!', nodes: data, username: (req.session.user) ? req.session.user.username : `` });
@@ -311,6 +311,21 @@ app.post('/submitusername', (req, res) => {
   res.status(200);
   const str = encodeURIComponent(req.body.username);
   res.redirect("/view?u=" + str);
+});
+
+app.post('/randomsearch', async (req, res) => {
+  res.status(200);
+  const query = `SELECT users.username FROM users INNER JOIN files ON files.username = users.username AND files.filename = 'index.html';`;
+    const data = await db.any(query)
+      .then((users) => {
+        const len = users.length;
+        const ran = Math.floor(Math.random()*len);
+        console.log(`of users ${users}, ${users[ran].username} was picked`);
+        res.redirect(`/view?u=` + users[ran].username);
+      })
+      .catch((err) => {
+        console.log(`error occurred in random search! ${err}`);
+      });
 });
 
 app.get('/viewuserworld', (req, res) => {
@@ -361,7 +376,18 @@ app.get('/view', async (req, res) => {
       });
   } else {
     res.status(200);
-    res.render("pages/view", {title: `${req.session.user.username}'s World`, src: `/viewmyworld`, username: req.session.user.username});
+    if (req.session)
+      res.render("pages/view", {title: `${req.session.user.username}'s World`, src: `/viewmyworld`, username: req.session.user.username});
+    else {
+      try {
+        const query = `SELECT users.username FROM users INNER JOIN files ON files.username = users.username AND files.filename = 'index.html';`;
+        const data = await db.any(query);
+        res.render('pages/home', { message: `userbase seems to be empty!`, title: 'Welcome to World View!', nodes: data, username: (req.session.user) ? req.session.user.username : `` });
+      }
+      catch (err){
+        res.render('pages/home', { message: "Error!! home", username: (req.session.user) ? req.session.user.username : ``});
+      }
+    }
   }
 });
 
@@ -619,7 +645,7 @@ app.post('/messages/:username', (req, res) => {
 app.get('/friends', async (req, res) => {
   const user = req.session.user.username;
   const friends = await db.any('SELECT friend_id FROM friends WHERE user_id = $1', [user]);
-  res.render('pages/friends', { friends });
+  res.render('pages/friends', { friends, username: req.session.user.username });
 });
 
 // Route to add a friend
@@ -631,11 +657,11 @@ app.post('/addfriend', async (req, res) => {
   const alreadyFriends = await db.oneOrNone('SELECT user_id FROM friends WHERE (user_id = $1 AND friend_id = $2)', [user, friend])
 
   if (user === friend) {
-    res.render('pages/friends', { message: "Cannot add yourself as a friend", friends });
+    res.render('pages/friends', { message: "Cannot add yourself as a friend", friends,  username: req.session.user.username});
   } else if (!friendExists) {
-    res.render('pages/friends', { message: "This user does not exist", friends });
+    res.render('pages/friends', { message: "This user does not exist", friends, username: req.session.user.username });
   } else if (alreadyFriends) {
-    res.render('pages/friends', { message: "You are already friends with this person", friends });
+    res.render('pages/friends', { message: "You are already friends with this person", friends, username: req.session.user.username });
   } else {
     await db.none('INSERT INTO friends (user_id, friend_id) VALUES ($1, $2)', [user, friend]);
     res.redirect('/friends');

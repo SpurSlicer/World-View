@@ -17,7 +17,12 @@
           <!-- I should find out how to make this signal if there are new messages -->
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">Random</a>
+          <button type="submit" form="random-search" class="nav-link btn-outline-light border-0">
+              Random
+          </button>
+          <form action="/randomsearch" id="random-search" method="POST">
+            <input class="form-control" type="text" id="random-search-input" style="display:none;">
+          </form>
         </li>
       </ul>
 
