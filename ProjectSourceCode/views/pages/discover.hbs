@@ -1,21 +1,22 @@
 {{> message }} 
-{{>nav}}
-{{> nav2 }} <!-- Why is this overpowering the initial nav? -->
+{{>nav}} <!-- perhaps make some slight adjustments here or on the head partial to always say the name World view at the top of the screen -->
+{{> nav2 }} 
 
 <table>
     <thead>
         <tr>
-            <th>World Name</th>
-            <th>World Creator</th>
-            <th>World Tags</th> <!-- Whatever other aspects should be displayed -->
-            <th>Visit</th>
+            <!-- see how this style looks and possible change -->
+            <th style="color:#68AB77; background-color:aqua">World Name</th>
+            <th style="color:#68AB77; background-color:aqua">World Creator</th>
+            <th style="color:#68AB77; background-color:aqua">World Tags</th> <!-- Whatever other aspects should be displayed -->
+            <th style="color:#68AB77; background-color:aqua">Visit</th>
         </tr>
     </thead>
     <tbody>
         {{#each files}} <!-- can I pile on if statments here for the tags, also where can I find this ? -->
         <tr>
-            <td>{{this.username}}</td>
-            <td>{{this.filename}}</td>
+            <td style="color:aqua; background-color:#68AB77">{{this.username}}</td>
+            <td style="color:aqua; background-color:#68AB77">{{this.filename}}</td>
             <!-- <td>{{this.world_tags}}</td> -->
             <td>
                 <form method="GET" action="/view">
