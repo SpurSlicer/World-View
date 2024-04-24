@@ -159,7 +159,7 @@ app.get('/discover', (req, res) => {
     });
 });
 app.get('/dhtml', (req, res) => {
-  db.any("SELECT * FROM files WHERE tag = 'HTML';") 
+  db.any("SELECT * FROM files WHERE 'HTML' = ANY (tags);")//("SELECT * FROM files WHERE tag = 'HTML';") 
   .then(files => {
       console.log(files)
       res.render('pages/dhtml', {
@@ -176,7 +176,7 @@ app.get('/dhtml', (req, res) => {
     });
 });
 app.get('/dcss', (req, res) => {
-  db.any("SELECT * FROM files WHERE tag = 'CSS';") 
+  db.any("SELECT * FROM files WHERE 'CSS' = ANY (tags);")//("SELECT * FROM files WHERE tag = 'CSS';") 
   .then(files => {
       console.log(files)
       res.render('pages/dcss', {
@@ -193,7 +193,7 @@ app.get('/dcss', (req, res) => {
     });
 });
 app.get('/dgame', (req, res) => {
-  db.any("SELECT * FROM files WHERE tag = 'Game';") 
+  db.any("SELECT * FROM files WHERE 'Game' = ANY (tags);")//("SELECT * FROM files WHERE tag = 'Game';") 
   .then(files => {
       console.log(files)
       res.render('pages/dgame', {
