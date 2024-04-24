@@ -140,6 +140,27 @@ function sessionPop(r, s) {
 }
 
 // TODO - Include your API routes here
+
+app.get('/discover', (req, res) => {
+  db.any("SELECT * FROM files;")
+  .then(files => {
+      console.log(files)
+      res.render('pages/discover', {
+        files,
+        action: 'view',
+      });
+  })
+  .catch(err => {
+      res.render('pages/courses', {
+        files: [],
+        error: true,
+        message: err.message,
+      });
+    });
+});
+
+
+
 app.get('/', async (req, res) => {
   try {
     
@@ -685,3 +706,5 @@ app.post('/unfriend', async (req, res) => {
 // This needs to replace app.listen(3000);
 module.exports = app.listen(3000);
 console.log('Server is listening on port 3000');
+
+
