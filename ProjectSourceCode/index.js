@@ -167,16 +167,7 @@ app.post('/register', async (req, res) => {
     await db.none(query, [req.body.username, hash])
     .then(() => {
       res.status(200);
-      tags = ""
-      query2 = 'INSERT INTO files tags VALUES $1 WHERE username = $2 AND filename = "index.html";';
-      db.any(query2, [tags, req.session.user.username])
-        .then(() => {
-          console.log("Tags created successfully");
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-      res.redirect('/login');
+      res.redirect('pages/login');
     })
     .catch(err => {
       //console.log(err);
