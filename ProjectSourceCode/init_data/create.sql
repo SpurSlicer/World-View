@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS files (
+    file_id SERIAL PRIMARY KEY,
     username VARCHAR(60) NOT NULL,
     filename VARCHAR(100) NOT NULL,
     data TEXT
@@ -29,6 +30,7 @@ CREATE TABLE IF NOT EXISTS friends (
 
 CREATE TABLE IF NOT EXISTS worlds (
     world_id SERIAL PRIMARY KEY,
+    file_id INTEGER NOT NULL,
     username VARCHAR(50) NOT NULL,
     tags VARCHAR(100)
 );
