@@ -9,9 +9,6 @@
       </div>
       <form action="/changeTags" id='changeTags' method="POST">
         <div class="modal-body">
-          {{#each tags}}
-            <p>{{this.theTags}}</p>
-          {{/each}}
           <p>Please select the tags you would like to use</p>
           <input type="checkbox" class="btn-check" id="game" name="game" value=0 autocomplete="off" onclick="$(this).attr('value', this.checked ? 1 : 0)">
           <label class="btn btn-outline-primary" for="game">Game</label><br>

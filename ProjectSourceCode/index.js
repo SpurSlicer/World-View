@@ -167,6 +167,15 @@ app.post('/register', async (req, res) => {
     await db.none(query, [req.body.username, hash])
     .then(() => {
       res.status(200);
+      tags = ""
+      query2 = 'INSERT INTO files tags VALUES $1 WHERE username = $2 AND filename = "index.html";';
+      db.any(query2, [tags, req.session.user.username])
+        .then(() => {
+          console.log("Tags created successfully");
+        })
+        .catch((error) => {
+          console.log(error);
+        });
       res.redirect('/login');
     })
     .catch(err => {
@@ -294,17 +303,15 @@ app.get('/test', async (req, res) => {
 });
 
 app.get('/home', async (req, res) => {
-  try {
-    
-    const query = `SELECT users.username FROM users INNER JOIN files ON files.username = users.username AND files.filename = 'index.html';`;
-    const data = await db.any(query);
-
-    res.render('pages/home', { title: 'Welcome to World View!', nodes: data, username: (req.session.user) ? req.session.user.username : `` });
-
-  }
-  catch (err){
-    res.render('pages/home', { message: "Error!! home", username: (req.session.user) ? req.session.user.username : ``});
-  }
+    const query = `SELECT users.username, files.tags FROM users INNER JOIN files ON files.username = users.username AND files.filename = 'index.html';`;
+    await db.any(query)
+    .then((data) => {
+      console.log(data);
+      res.render('pages/home', { title: 'Welcome to World View!', nodes: data, username: (req.session.user) ? req.session.user.username : `` });
+    })
+    .catch ((err) => {
+      res.render('pages/home', { message: "Error!! home", username: (req.session.user) ? req.session.user.username : ``});
+    })
 });
 
 app.post('/submitusername', (req, res) => {
@@ -440,8 +447,18 @@ app.get('/myworld', (req, res) => {
     const fileContents = fs.readFileSync(path.join(dir, req.session.url));
     const m = sessionPop(req.session.messages, req.session);
     res.status(200);
-    theTags = getTags(userToWorlds(req.session.url));
-    res.render("pages/myworld", { file: fileContents.toString(), filenames: worldDir, curr: req.session.url, username: req.session.user.username, message: (m) ? m : ``, tags: theTags});
+    query2 = `SELECT tags FROM files WHERE username = $1 AND filename = 'index.html';`;
+    theTags = ""
+    db.one(query2, [req.session.user.username])
+      .then((tags) => {
+        theTags = tags.tags;
+        console.log(`Tags:`, tags, `theTags:`, theTags);
+        res.render("pages/myworld", { file: fileContents.toString(), filenames: worldDir, curr: req.session.url, username: req.session.user.username, message: (m) ? m : ``, tags: theTags});
+      })
+      .catch((error) => {
+        console.log(error);
+        res.render("pages/myworld", { file: fileContents.toString(), filenames: worldDir, curr: req.session.url, username: req.session.user.username, message: (m) ? m : ``, tags: theTags});
+      });
 });
 
 app.post('/savefile', async (req, res) => {
@@ -579,7 +596,6 @@ app.post('/newfile', async (req, res) => {
         console.log(`new file was written to ${dir}!`);
       }
     });
-    makeTags(req.session.user.username);
     req.session.url = `newfile${count}`;
     req.session.save();
     res.redirect('/myworld');
@@ -676,47 +692,28 @@ app.post('/unfriend', async (req, res) => {
   res.redirect('/friends');
 });
 
-function getTags(file_id){
-  query = 'SELECT tags FROM worlds WHERE file_id = $1;';
-  db.any(query, [file_id])
-    .then(data => {
-      console.log(data.tags);
-      return data.tags;
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-};
-
-function makeTags(username) {
-  tags = ""
-  file_id = userToWorlds(req.session.url);
-  query = 'INSERT INTO worlds (file_id, username, tags) VALUES ($1, $2, $3);';
-  db.any(query, [file_id, username, tags])
-    .then(() => {
-      return true;
-    })
-    .catch(() => {
-      return false;
-    });
-}
 
 //alters the tags associated with a world id
 app.post('/changeTags', async (req, res) => {
-  tags = ""
+  let tags = ""
+  let arr = []
+  let count = 0
   console.log(req.body.game)
   if (req.body.game == 1){
-    tags = tags + "game, "
+    
+    arr[count] = 'game'
+    count++;
   }
   if (req.body.html == 1){
-    tags = tags + "html, "
+    arr[count] = 'html'
+    count++;
   }
   if (req.body.css == 1){
-    tags = tags + "css, "
+    arr[count] = 'css'
+    count++;
   }
-  file_id = userToWorlds(req.session.url);
-  query = 'UPDATE worlds SET tags = $1 WHERE file_id = $2;';
-  await db.any(query, [tags, file_id])
+  query = `UPDATE files SET tags = $1 WHERE username = $2 AND filename = 'index.html';`;
+  db.any(query, [arr, req.session.user.username])
     .then(() => { 
       res.status(200);
       console.log("Tags updated successfully");
@@ -731,13 +728,6 @@ app.post('/changeTags', async (req, res) => {
 
 //when getTags is called uses the getTags function to return a string of all the tags associated with a world id.
 
-function userToWorlds(filename) {
-  query = 'SELECT file_id FROM files WHERE filename = $1;';
-  db.any(query, [filename])
-    .then(data => {
-      return data.file_id;
-    });
-}
 
 
 // *****************************************************

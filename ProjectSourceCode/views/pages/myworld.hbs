@@ -64,9 +64,14 @@ button {
         <li class="nav-item" style="align-items:end;">
             <a class="nav-link" href="/users">Exit</a>
         </li>
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#tagmodal">
+        <button type="button" class="nav-link btn-outline-light border-0 link-like" data-toggle="modal" data-target="#tagmodal">
           Change Tags
         </button>
+        <ul>
+          {{#each tags}}
+              <li>{{this}}</li>
+          {{/each}}
+      </ul>
       </ul>
     </div>
   </nav>

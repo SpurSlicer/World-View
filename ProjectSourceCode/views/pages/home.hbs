@@ -43,6 +43,11 @@
                     <div class="text-container">
                         <!--<p><strong>{{this.filename}}</strong></p>-->
                         <p><strong>{{this.username}}</strong>'s World</p>
+                        <ul>
+                            {{#each this.tags}}
+                                <li>{{this}}</li>
+                            {{/each}}
+                        </ul>
                     </div>
                 </div>
             </form>

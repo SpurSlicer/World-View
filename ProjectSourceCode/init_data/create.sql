@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS files (
     file_id SERIAL PRIMARY KEY,
     username VARCHAR(60) NOT NULL,
     filename VARCHAR(100) NOT NULL,
+    tags TEXT[3],
     data TEXT
 );
 
@@ -28,9 +29,3 @@ CREATE TABLE IF NOT EXISTS friends (
     FOREIGN KEY (friend_id) REFERENCES users(username)
 );
 
-CREATE TABLE IF NOT EXISTS worlds (
-    world_id SERIAL PRIMARY KEY,
-    file_id INTEGER NOT NULL,
-    username VARCHAR(50) NOT NULL,
-    tags VARCHAR(100)
-);
