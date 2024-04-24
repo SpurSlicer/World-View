@@ -16,10 +16,12 @@ const session = require('express-session'); // To set the session object. To sto
 const bcrypt = require('bcrypt'); //  To hash passwords
 const fs = require('fs'); // File system operations
 const url = require('url');
+const { isUndefined } = require('util');
 
-const dir = path.join("views", "world_files");
+const dir = path.join("views", "files", "world_files");
+const userDir = path.join("views", "files", "user_world_files");
 const options = {
-  root: path.join(__dirname, 'views', 'world_files')
+  root: path.join(__dirname, 'views', 'files')
 };
 const sampleHTML = 
   `<!DOCTYPE html>
@@ -81,7 +83,7 @@ app.engine('hbs', hbs.engine);
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(bodyParser.json()); // specify the usage of JSON for parsing request body.
-app.use(express.static(path.join(__dirname, 'views', 'world_files')));
+app.use(express.static(path.join(__dirname, 'views', 'files')));
 app.use(fileUpload({
   limits: { fileSize: 1024**3}
 }));
@@ -115,25 +117,28 @@ app.use(
 // <!-- Section 4 : API Routes -->
 // *****************************************************
 
-function deleteFiles() {
+function deleteFiles(dir) {
   if (fs.existsSync(dir)) {
     fs.rmSync(dir, {recursive:true});
   }
   fs.mkdirSync(dir, {recursive:true});
 }
-function messagePush(r, msg) {
-  r.messages.push(msg);
-  r.save();
+
+function sessionPush(r, s, m) {
+  console.log(`Pushing:`, m);
+  r.push(m);
+  s.save();
   return;
 }
 
-function messagePop(r) {
-  if (r.messages.length > 0) {
-    const m = r.messages.pop();
-    r.save();
+function sessionPop(r, s) {
+  if (r.length > 0) {
+    const m = r.pop();
+    s.save();
     return m;
   } else return ``;
 }
+
 // TODO - Include your API routes here
 
 app.get('/discover', (req, res) => {
@@ -159,7 +164,7 @@ app.get('/discover', (req, res) => {
 app.get('/', async (req, res) => {
   try {
     
-    const query = 'SELECT users.username, files.filename FROM users LEFT JOIN files on files.username = users.username;';
+    const query = `SELECT users.username FROM users INNER JOIN files ON files.username = users.username AND files.filename = 'index.html';`;
     const data = await db.any(query);
 
     res.render('pages/home', { title: 'Welcome to World View!', nodes: data, username: (req.session.user) ? req.session.user.username : `` });
@@ -167,7 +172,7 @@ app.get('/', async (req, res) => {
   }
   catch (err){
     res.render('pages/home', { message: "Error!! home", username: (req.session.user) ? req.session.user.username : ``});
-  }});
+}});
 
 app.get('/register', (req, res) => {
   res.status(200);
@@ -215,7 +220,7 @@ app.post('/login', async (req, res) => {
               req.session.url = `index.html`;
               req.session.messages = [];
               req.session.save();
-              deleteFiles();
+              deleteFiles(dir);
               await db.any(queryFiles, [req.body.username])
                 .then((files) => {
                   if (files.length > 0) {
@@ -246,7 +251,7 @@ app.post('/login', async (req, res) => {
                   return res.render('pages/login', { message: "Unexpected db error."});        
                 });
               res.status(200);
-              res.redirect('/myworld');
+              res.redirect('/home');
             }
           })
           .catch(err => {
@@ -277,7 +282,8 @@ app.get('/welcome', (req, res) => {
 
 app.get('/logout', (req, res) => {
   console.log(`dir is ${dir}`);
-  deleteFiles();
+  deleteFiles(dir);
+  deleteFiles(userDir);
   req.session.destroy();
   res.status(200);
   res.render('pages/logout', { message: "Logged out successfully" })
@@ -310,7 +316,7 @@ app.get('/test', async (req, res) => {
 app.get('/home', async (req, res) => {
   try {
     
-    const query = 'SELECT users.username, files.filename FROM users LEFT JOIN files on files.username = users.username;';
+    const query = `SELECT users.username FROM users INNER JOIN files ON files.username = users.username AND files.filename = 'index.html';`;
     const data = await db.any(query);
 
     res.render('pages/home', { title: 'Welcome to World View!', nodes: data, username: (req.session.user) ? req.session.user.username : `` });
@@ -321,25 +327,104 @@ app.get('/home', async (req, res) => {
   }
 });
 
-// Authentication Required
-app.use(auth);
-
-// Maybe use an iframe for this 👀👀
-app.get('/view', (req, res) => {
-    res.status(200);
-    res.render("pages/view", {title: `${req.session.user.username}'s World`, username: req.session.user.username});
+app.post('/submitusername', (req, res) => {
+  res.status(200);
+  const str = encodeURIComponent(req.body.username);
+  res.redirect("/view?u=" + str);
 });
 
-app.get('/viewmyworld', (req, res) => {
+app.post('/randomsearch', async (req, res) => {
   res.status(200);
-  res.sendFile('index.html', options, (err) => {
+  const query = `SELECT users.username FROM users INNER JOIN files ON files.username = users.username AND files.filename = 'index.html';`;
+    const data = await db.any(query)
+      .then((users) => {
+        const len = users.length;
+        const ran = Math.floor(Math.random()*len);
+        console.log(`of users ${users}, ${users[ran].username} was picked`);
+        res.redirect(`/view?u=` + users[ran].username);
+      })
+      .catch((err) => {
+        console.log(`error occurred in random search! ${err}`);
+      });
+});
+
+app.get('/viewuserworld', (req, res) => {
+  res.status(200);
+  res.sendFile(path.join('user_world_files', 'index.html'), options, (err) => {
     if (err) {
       console.log('Error sending file:', err);
     } else {
       console.log('Sent successfully');
     }
   });
-})
+});
+
+app.get('/view', async (req, res) => {
+  if (req.query.u) {
+    const username = req.query.u;
+    console.log(username);
+    if (username === ``) {
+      res.status(400);
+      return res.render('pages/login', {message: `username sent incorrectly!`, username: (req.session.user) ? req.session.user.username : `` });    
+    }
+    const queryFiles = "SELECT * FROM files WHERE username = $1;";
+    deleteFiles(userDir);
+    await db.any(queryFiles, [username])
+      .then((files) => {
+        if (files.length > 0) {
+          console.log(`USER FILES FOUND:`, files, files.length);
+          for (const file of files) {
+            fs.writeFile(path.join(userDir, file.filename), file.data, err => {
+              if (err) {
+                console.log(`$${file.filename} could not be written to ${dir}!`);
+              } else {
+                console.log(`$${file.filename} was written to ${dir}!`);
+              }
+            });
+          }
+          res.status(200);
+          res.render('pages/view', {title: `${username}'s World`, src: `/viewuserworld`, username: username});
+        } else {
+          res.status(404);
+          return res.render('pages/login', {message: `${username} has no world files!`, username: (req.session.user) ? req.session.user.username : `` });    
+        }
+      })
+      .catch((err) => {
+        console.log(`Unexpected db error ${err}!`);
+        res.status(400);
+        return res.render('pages/login', { message: "Unexpected db error."});        
+      });
+  } else {
+    res.status(200);
+    if (req.session)
+      res.render("pages/view", {title: `${req.session.user.username}'s World`, src: `/viewmyworld`, username: req.session.user.username});
+    else {
+      try {
+        const query = `SELECT users.username FROM users INNER JOIN files ON files.username = users.username AND files.filename = 'index.html';`;
+        const data = await db.any(query);
+        res.render('pages/home', { message: `userbase seems to be empty!`, title: 'Welcome to World View!', nodes: data, username: (req.session.user) ? req.session.user.username : `` });
+      }
+      catch (err){
+        res.render('pages/home', { message: "Error!! home", username: (req.session.user) ? req.session.user.username : ``});
+      }
+    }
+  }
+});
+
+// Authentication Required
+app.use(auth);
+
+// Maybe use an iframe for this 👀👀
+app.get('/viewmyworld', (req, res) => {
+  res.status(200);
+  res.sendFile(path.join('world_files', 'index.html'), options, (err) => {
+    if (err) {
+      console.log('Error sending file:', err);
+    } else {
+      console.log('Sent successfully');
+    }
+  });
+});
 
 app.get('/myworld', (req, res) => {
     if (!req.session.user) {
@@ -373,7 +458,7 @@ app.get('/myworld', (req, res) => {
     }
     if (!fs.existsSync(path.join(dir, req.session.url))) req.session.url = `index.html`;
     const fileContents = fs.readFileSync(path.join(dir, req.session.url));
-    const m = messagePop(req.session);
+    const m = sessionPop(req.session.messages, req.session);
     res.status(200);
     res.render("pages/myworld", { file: fileContents.toString(), filenames: worldDir, curr: req.session.url, username: req.session.user.username, message: (m) ? m : ``});
 });
@@ -406,7 +491,7 @@ app.post('/savefile', async (req, res) => {
           if (err) console.log(`could not write ${req.body.filename}`);
           else console.log(`wrote ${req.body.filename} successfully`);
         });
-        messagePush(req.session, `${req.body.filename} saved successfully!`);
+        sessionPush(req.session.messages, req.session, `${req.body.filename} saved successfully!`);
         res.status(200);
         res.redirect("/myworld");
       })
@@ -419,21 +504,21 @@ app.post('/savefile', async (req, res) => {
               if (err) console.log(`could not write ${req.filename}`);
               else console.log(`wrote ${req.body.filename} successfully`);
             });
-            messagePush(req.session, `${req.body.filename} saved successfully!`);
+            sessionPush(req.session.messages, req.session, `${req.body.filename} saved successfully!`);
             res.status(200);
             res.redirect("/myworld");
           })
           .catch((err) => {
             console.log(err);
             console.log("in error block :(");
-            messagePush(req.session, `error in saving ${req.body.filename}!`);
+            sessionPush(req.session.messages, req.session, `error in saving ${req.body.filename}!`);
             res.status(400);
             res.redirect("/myworld");    
           });
       });
   } catch (err) {
       console.log(err);
-      messagePush(req.session, `A server error occurred.`);
+      sessionPush(req.session.messages, req.session, `A server error occurred.`);
       res.redirect('/myworld');
   }
 });
@@ -447,19 +532,19 @@ app.post('/deletefile', async (req, res) => {
         fs.rmSync(path.join(dir, req.body.filename));
         req.session.url = `index.html`;
         req.session.save();
-        messagePush(req.session, `${req.body.filename} Deleted from database!`);
+        sessionPush(req.session.messages, req.session, `${req.body.filename} Deleted from database!`);
         res.status(200);
         res.redirect('/myworld');
       })
       .catch((err) => {
         console.log(err);
-        messagePush(req.session, `Could not delete ${req.body.filename}; is it saved?!`);
+        sessionPush(req.session.messages, req.session, `Could not delete ${req.body.filename}; is it saved?!`);
         res.status(400);
         res.redirect('/myworld');
       });
   } catch (err) {
     console.log(err);
-    messagePush(req.session, `A server error occurred.`);
+    sessionPush(req.session.messages, req.session, `A server error occurred.`);
     res.redirect('/myworld');  }
 });
 
@@ -471,7 +556,7 @@ app.post('/openfile', async (req, res) => {
     res.redirect("/myworld");
   } catch (err) {
     console.log(err);
-    messagePush(req.session, `A server error occurred.`);
+    sessionPush(req.session.messages, req.session, `A server error occurred.`);
     res.redirect('/myworld');  }
 })
 
@@ -493,12 +578,12 @@ app.post('/uploadfile', async (req, res) => {
         else console.log(`uploaded ${file.name} successfully`);
       });
     }
-    messagePush(req.session, `File upload completed successfully!`);
+    sessionPush(req.session.messages, req.session, `File upload completed successfully!`);
     res.status(200);
     res.redirect('/myworld');
   } catch (err) {
     console.log(err);
-    messagePush(req.session, `A server error occurred.`);
+    sessionPush(req.session.messages, req.session, `A server error occurred.`);
     res.redirect('/myworld');  }
 })
 
@@ -518,7 +603,7 @@ app.post('/newfile', async (req, res) => {
     res.redirect('/myworld');
   } catch (err) {
     console.log(err);
-    messagePush(req.session, `A server error occurred.`);
+    sessionPush(req.session.messages, req.session, `A server error occurred.`);
     res.redirect('/myworld');  }
 });
 
@@ -557,8 +642,6 @@ app.get('/messages/:username', (req, res) => {
         });
 });
 
-
-
 app.post('/messages/:username', (req, res) => {
     const sendingTo = req.params.username;
     const currentUser = req.session.user.username
@@ -573,6 +656,44 @@ app.post('/messages/:username', (req, res) => {
             res.send('Error sending message');
         });
 });
+
+// Friends
+
+// Route to display friends
+app.get('/friends', async (req, res) => {
+  const user = req.session.user.username;
+  const friends = await db.any('SELECT friend_id FROM friends WHERE user_id = $1', [user]);
+  res.render('pages/friends', { friends, username: req.session.user.username });
+});
+
+// Route to add a friend
+app.post('/addfriend', async (req, res) => {
+  const user = req.session.user.username;
+  const { friend } = req.body;
+  const friends = await db.any('SELECT friend_id FROM friends WHERE user_id = $1', [user]);
+  const friendExists = await db.oneOrNone('SELECT username FROM users WHERE username = $1', [friend]);
+  const alreadyFriends = await db.oneOrNone('SELECT user_id FROM friends WHERE (user_id = $1 AND friend_id = $2)', [user, friend])
+
+  if (user === friend) {
+    res.render('pages/friends', { message: "Cannot add yourself as a friend", friends,  username: req.session.user.username});
+  } else if (!friendExists) {
+    res.render('pages/friends', { message: "This user does not exist", friends, username: req.session.user.username });
+  } else if (alreadyFriends) {
+    res.render('pages/friends', { message: "You are already friends with this person", friends, username: req.session.user.username });
+  } else {
+    await db.none('INSERT INTO friends (user_id, friend_id) VALUES ($1, $2)', [user, friend]);
+    res.redirect('/friends');
+  }
+}); 
+
+// Route to unfriend someone
+app.post('/unfriend', async (req, res) => {
+  const user = req.session.user.username;
+  const { friend } = req.body;
+  await db.none('DELETE FROM friends WHERE user_id = $1 AND friend_id = $2', [user, friend]);
+  res.redirect('/friends');
+});
+
 
 
 
