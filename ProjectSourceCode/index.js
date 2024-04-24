@@ -147,7 +147,7 @@ app.get('/discover', (req, res) => {
       console.log(files)
       res.render('pages/discover', {
         files,
-        action: 'view', // change action to submitusername ???
+        action: 'submitusername', // change action to submitusername not view???
       });
   })
   .catch(err => {
@@ -159,12 +159,12 @@ app.get('/discover', (req, res) => {
     });
 });
 app.get('/dhtml', (req, res) => {
-  db.any("SELECT * FROM files WHERE 'HTML' = ANY (tags);")//("SELECT * FROM files WHERE tag = 'HTML';") 
+  db.any("SELECT * FROM files WHERE 'HTML' = ANY (tags);")//("SELECT * FROM files WHERE tag = 'HTML';")  My initial version was     tag VARCHAR(100),
   .then(files => {
       console.log(files)
       res.render('pages/dhtml', {
         files,
-        action: 'view',
+        action: 'submitusername',
       });
   })
   .catch(err => {
@@ -181,7 +181,7 @@ app.get('/dcss', (req, res) => {
       console.log(files)
       res.render('pages/dcss', {
         files,
-        action: 'view',
+        action: 'submitusername',
       });
   })
   .catch(err => {
@@ -198,7 +198,7 @@ app.get('/dgame', (req, res) => {
       console.log(files)
       res.render('pages/dgame', {
         files,
-        action: 'view',
+        action: 'submitusername',
       });
   })
   .catch(err => {
