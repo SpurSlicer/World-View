@@ -4,15 +4,15 @@
 <table>
     <thead>
         <tr>
-            <!-- see how this style looks and possible change -->
-            <th style="color:#68AB77; background-color:aqua">World Name</th>
-            <th style="color:#68AB77; background-color:aqua">World Creator</th>
-            <th style="color:#68AB77; background-color:aqua">World Tag</th> <!-- Whatever other aspects should be displayed -->
-            <th style="color:#68AB77; background-color:aqua">Visit</th>
+            <th style="color:#309e48; background-color:aqua">Creator</th>
+            <th style="color:#309e48; background-color:aqua">File Name</th>
+            <th style="color:#309e48; background-color:aqua">Tag's</th> 
+            <th style="color:#309e48; background-color:aqua">View Code</th> 
+            <th style="color:#309e48; background-color:aqua">Visit</th>
         </tr>
     </thead>
     <tbody>
-        {{#each files}} <!-- can I pile on if statments here for the tags, also where can I find this ? -->
+        {{#each files}} 
         <tr>
             <td style="color:aqua; background-color:#68AB77">{{this.username}}</td>
             <td style="color:aqua; background-color:#68AB77">{{this.filename}}</td>
@@ -21,15 +21,34 @@
                     <li style="margin:0.5px;font-size: 15px">{{this}}</li>
                 {{/each}}
             </td>
-            <!--<td style="color:aqua; background-color:#68AB77">{{this.tag}}</td>   <li style="margin:0.5px;font-size: 15px">{{this}}</li>-->
-            <td>
+            <td style="color:aqua; background-color:#68AB77">
+                <button style="color:aqua; background-color:#68AB77" type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalLong"> View Code </button> <!-- make a pop up -->
+            </td>
+            <td style="color:aqua; background-color:#68AB77">
                 <form action="/submitusername" method="POST">
                 <input class="form-control" type="text" name="username"  value={{this.username}} style="display:none;">
-                <!-- <div class="grid-item" onclick="javascript:this.parentNode.submit()">LOOK at home-->
                     <button type="submit" style="color:aqua; background-color:#68AB77">Visit</button> 
                 </form>
             </td>
         </tr>
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">{{this.username}}'s Code for the file {{this.filename}}</h5>
+            </div>
+            <div class="modal-body">
+                {{this.data}}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+            </div>
+        </div>
+        </div>
+
         {{/each}}
     </tbody>
 </table>
