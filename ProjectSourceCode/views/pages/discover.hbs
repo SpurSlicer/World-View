@@ -14,20 +14,20 @@
     <tbody>
         {{#each files}} 
         <tr>
-            <td style="color:aqua; background-color:#68AB77">{{this.username}}</td>
-            <td style="color:aqua; background-color:#68AB77">{{this.filename}}</td>
-            <td style="color:aqua; background-color:#68AB77">
+            <td style="color:white; background-color:#68AB77">{{this.username}}</td>
+            <td style="color:white; background-color:#68AB77">{{this.filename}}</td>
+            <td style="color:white; background-color:#68AB77">
                 {{#each this.tags}}
                     <li style="margin:0.5px;font-size: 15px">{{this}}</li>
                 {{/each}}
             </td>
-            <td style="color:aqua; background-color:#68AB77">
-                <button style="color:aqua; background-color:#68AB77" type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalLong"> View Code </button> <!-- make a pop up -->
+            <td style="color:white; background-color:#68AB77">
+                <button style="text-decoration-line: underline;" type="button" class="nav-link btn-outline-light border-0" data-toggle="modal" data-target="#exampleModalLong"> View Code </button> <!-- make a pop up -->
             </td>
-            <td style="color:aqua; background-color:#68AB77">
+            <td style="color:white; background-color:#68AB77">
                 <form action="/submitusername" method="POST">
                 <input class="form-control" type="text" name="username"  value={{this.username}} style="display:none;">
-                    <button type="submit" style="color:aqua; background-color:#68AB77">Visit</button> 
+                    <button type="submit" style="text-decoration-line: underline;" class="nav-link btn-outline-light border-0">Visit</button> 
                 </form>
             </td>
         </tr>
