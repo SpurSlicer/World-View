@@ -8,7 +8,7 @@ Why is that you ask?
 - Connect with other website creators to learn from one another
 
 ## Directory Structure
-.
+```
 └── Edit me to generate/
     ├── images/
     │   └── *
@@ -35,7 +35,7 @@ Why is that you ask?
     ├── index.js
     ├── package.json
     └── package-lock.json
-
+```
 Images contains local resources for the webpage like the world icon; init_data builds the sql databases with `create.sql` when the `docker-compose.yaml` is run; node_modules contains npm libraries; test contains test case code should you want to run test cases; views contains a file cache for other user and current user world files, the main layout, webpages code, and partials used by webpages and main. Please make sure you create `ProjectSourceCode/.env` and include `"token": "<enter token here>"` for token usage. `index.js` holds all custom API calls--all are in REST style. You should not need to edit the `docker-compose.yaml` or `package.json` files, though you may need to change the run command in `docker-compose.yaml` if you want to use test cases.
 
 ## Contributors
