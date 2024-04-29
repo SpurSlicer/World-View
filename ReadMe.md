@@ -44,4 +44,4 @@ $ docker compose up
 Finally go to this link: http://localhost:3000/
 
 ## Link
-http://worldview.eastus.cloudapp.azure.com:3000/
+World-View Web Version: http://worldview.eastus.cloudapp.azure.com:3000/
