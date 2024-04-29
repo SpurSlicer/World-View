@@ -22,7 +22,7 @@ Why is that you ask?
 - [VSCode](https://code.visualstudio.com/download)
 - [NodeJS](https://nodejs.org/en/download)
 - [Figma](https://www.figma.com/downloads/)
-- [Express](https://expressjs.com/en/starter/installing.html)
+- Express
 - bcrypt
 
 ## How to Run Locally
