@@ -57,7 +57,7 @@ Images contains local resources for the webpage like the world icon; init_data b
 - bcrypt
 
 ## How to Run Locally
-To clone and run this application, you'll need Git, NodeJS, Docker, Express, and PostgreSQL installed on your computer.
+To clone and run this application, you'll need Docker installed on your computer.
 ```
 # Clone
 $ git clone git@github.com:SpurSlicer/World-View.git
@@ -65,14 +65,18 @@ $ git clone git@github.com:SpurSlicer/World-View.git
 # Go into repository
 $ cd ProjectSourceCode
 
-# Install Express and bcrypt
-$ npm install express
-$ npm install bcrypt
-
 # Start docker
 $ docker compose up
 ```
 Finally go to this link: http://localhost:3000/
+
+```
+# Stop docker
+$ docker compose down
+
+# Stop docker and delete database content
+$ docker compose down -v
+```
 
 ## Link
 World-View Web Version: http://worldview.eastus.cloudapp.azure.com:3000/
