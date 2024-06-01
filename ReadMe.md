@@ -30,13 +30,26 @@ Why is that you ask?
     │   │   └── *
     │   └── partials/
     │       └── *
-    ├── .env
+    ├── .env [NOTE: YOU must add this!!]
     ├── docker-compose.yaml
     ├── index.js
     ├── package.json
     └── package-lock.json
 ```
-Images contains local resources for the webpage like the world icon; init_data builds the sql databases with `create.sql` when the `docker-compose.yaml` is run; node_modules contains npm libraries; test contains test case code should you want to run test cases; views contains a file cache for other user and current user world files, the main layout, webpages code, and partials used by webpages and main. The `src/env` file is included but must be filled in. Do NOT push changes of `src/env` to git (the gitignore is set to ignore it). `index.js` holds all custom API calls--all are in REST style. You should not need to edit the `docker-compose.yaml` or `package.json` files, though you may need to change the run command in `docker-compose.yaml` if you want to use test cases.
+Images contains local resources for the webpage like the world icon; init_data builds the sql databases with `create.sql` when the `docker-compose.yaml` is run; node_modules contains npm libraries; test contains test case code should you want to run test cases; views contains a file cache for other user and current user world files, the main layout, webpages code, and partials used by webpages and main. YOU must create the .env file from the template below. `index.js` holds all custom API calls--all are in REST style. You should not need to edit the `docker-compose.yaml` or `package.json` files, though you may need to change the run command in `docker-compose.yaml` if you want to use test cases.
+
+### src/.env
+Format your .env file like so:
+```
+# database credentials
+POSTGRES_USER="ENTER NAME"
+POSTGRES_PASSWORD="ENTER PASSWORD"
+POSTGRES_DB="ENTER DB NAME"
+
+# Node vars
+SESSION_SECRET="ENTER SECRET"
+```
+NEVER push this to github!!
 
 ## Built With
 - [Docker](https://www.docker.com/products/docker-desktop/)
