@@ -1,0 +1,90 @@
+{{> message}}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{title}}</title>
+    <style>
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .grid-item {
+            background-color: #77d6f8;
+            /* thoughtd be cute to make them circles */
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            overflow: hidden;
+            padding: 20px;
+            text-align: center;
+        }
+        .text-container {
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            padding: 5px;
+            max-width: 100%;
+            display: block;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    
+    <h1>{{title}}</h1>
+    <hr style="margin:2px;">
+    {{#if nodes}}
+        <h4 style="text-align:center;">Click on any world to explore!</h4>
+    {{else}}
+        <h4 style="text-align:center;">No worlds found :( try making one!!</h4>
+    {{/if}}
+    <div class="grid-container">
+        {{#each nodes}}
+            <form action="/submitusername" method="POST">
+                <input class="form-control" type="text" name="username"  value={{this.username}} style="display:none;">
+                <div class="grid-item" onclick="javascript:this.parentNode.submit()">
+                    <div class="text-container">
+                        <!--<p><strong>{{this.filename}}</strong></p>-->
+                        <p style="margin:0;font-size: 15px"><strong>{{this.username}}</strong>'s World</p>
+                        <ul>
+                            {{#each this.tags}}
+                                <li style="margin:0.5px;font-size: 15px">{{this}}</li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                </div>
+            </form>
+        {{/each}}
+    </div>
+
+    <script>
+    /* script for random color generator for worlds */
+    function randomColor() {
+
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+
+        for (var i = 0; i < 6; i++) {
+
+            color += letters[Math.floor(Math.random() * 16)];
+
+        }
+
+        return color;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+        var items = document.querySelectorAll('.grid-item');
+
+        items.forEach(function(item) {
+
+            item.style.backgroundColor = randomColor();
+
+        });
+    });
+    </script>
+</body>
+</html>

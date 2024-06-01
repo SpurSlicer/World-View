@@ -1,0 +1,94 @@
+<header>
+  <nav class="navbar navbar-expand-lg navbar-dark" style="background-color:#68AB77">
+    <div class="container-fluid">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="/home">Home</a>
+        </li>
+        <!--<li class="nav-item">
+          <a class="nav-link" href="/discover">Discover</a>
+        </li>-->
+        <li class="nav-item">
+          <a class="nav-link" href="/myworld">My World</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/users">Messages</a>
+          <!-- I should find out how to make this signal if there are new messages -->
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/friends">Friends</a>
+          <!-- I should find out how to make this signal if there are new messages -->
+        </li>
+        <li class="nav-item">
+          <button type="submit" form="random-search" class="nav-link btn-outline-light border-0">
+              Random
+          </button>
+          <form action="/randomsearch" id="random-search" method="POST">
+            <input class="form-control" type="text" id="random-search-input" style="display:none;">
+          </form>
+        </li>
+      </ul>
+
+      {{#if username}}
+      {{!-- Navbar for logged in user --}}
+      <ul class="navbar-nav">
+        <li class="nav-item pe-3">
+          <form class="d-flex" role="search">
+            <button class="btn" style="background-color:#68AB77" type="submit"><svg xmlns="http://www.w3.org/2000/svg"
+                width="16" height="16" fill="#ffffff" class="bi bi-search" viewBox="0 0 16 16">
+                <path
+                  d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+              </svg></button>
+            <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+          </form>
+        </li>
+        <li class="nav-item">
+        </li>
+        <li class="nav-item">
+          <div class="dropstart">
+            <button class="btn dropdown-toggle rounded-circle" type="button" data-bs-toggle="dropdown"
+              aria-expanded="false"></button>
+            <ul class="dropdown-menu dropdown-menu-dark">
+              <li><a class="dropdown-item" href="/logout">Log Out</a></li>
+            </ul>
+          </div>
+        </li>
+      </ul>
+      {{else}}
+      {{!-- Navbar for logged out user --}}
+      <ul class="navbar-nav">
+        <li class="nav-item pe-3">
+          <form class="d-flex" role="search">
+            <button class="btn" style="background-color:#68AB77" type="submit"><svg xmlns="http://www.w3.org/2000/svg"
+                width="16" height="16" fill="#ffffff" class="bi bi-search" viewBox="0 0 16 16">
+                <path
+                  d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+              </svg></button>
+            <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+          </form>
+        </li>
+        <li class="nav-item">
+          <a href="/login">
+            <button type="button" class="btn" style="background-color: #8AF7F8;">Log In</button>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/register" class="ps-2">
+            <button type="button" class="btn" style="background-color: #8AF7F8;">Register</button>
+          </a>
+        </li>
+      </ul>
+      {{/if}}
+    </div>
+
+    <div class="navbar-collapse collapse order-3 dual-collapse2">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="#">
+            {{ username }}
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</header>

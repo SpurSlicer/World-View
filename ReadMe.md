@@ -9,7 +9,7 @@ Why is that you ask?
 
 ## Directory Structure
 ```
-└── Edit me to generate/
+└── src/
     ├── images/
     │   └── *
     ├── init_data/
@@ -36,15 +36,7 @@ Why is that you ask?
     ├── package.json
     └── package-lock.json
 ```
-Images contains local resources for the webpage like the world icon; init_data builds the sql databases with `create.sql` when the `docker-compose.yaml` is run; node_modules contains npm libraries; test contains test case code should you want to run test cases; views contains a file cache for other user and current user world files, the main layout, webpages code, and partials used by webpages and main. Please make sure you create `ProjectSourceCode/.env` and include `"token": "<enter token here>"` for token usage. `index.js` holds all custom API calls--all are in REST style. You should not need to edit the `docker-compose.yaml` or `package.json` files, though you may need to change the run command in `docker-compose.yaml` if you want to use test cases.
-
-## Contributors
-- Ivan Bury
-- James Panya
-- Aiden Zavala
-- Gregory Del Bene
-- William Mowbray
-- Jake Zellmer
+Images contains local resources for the webpage like the world icon; init_data builds the sql databases with `create.sql` when the `docker-compose.yaml` is run; node_modules contains npm libraries; test contains test case code should you want to run test cases; views contains a file cache for other user and current user world files, the main layout, webpages code, and partials used by webpages and main. The `src/env` file is included but must be filled in. Do NOT push changes of `src/env` to git (the gitignore is set to ignore it). `index.js` holds all custom API calls--all are in REST style. You should not need to edit the `docker-compose.yaml` or `package.json` files, though you may need to change the run command in `docker-compose.yaml` if you want to use test cases.
 
 ## Built With
 - [Docker](https://www.docker.com/products/docker-desktop/)
@@ -63,7 +55,7 @@ To clone and run this application, you'll need Docker installed on your computer
 $ git clone git@github.com:SpurSlicer/World-View.git
 
 # Go into repository
-$ cd ProjectSourceCode
+$ cd src
 
 # Start docker
 $ docker compose up

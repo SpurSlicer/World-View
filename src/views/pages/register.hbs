@@ -1,0 +1,37 @@
+{{>message}}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="earth-img"></div>
+        </div>
+        <div class="col pt-5">
+            <h1>Register</h1>
+            <form action="/register" method="POST">
+                <div class="form-group py-3">
+                    <label for="username">Username</label>
+                    <input type="text" class="form-control" id="username" name="username">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" name="password">
+                </div>
+                <button type="button" style="background-color: #8AF7F8;" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Register</button> <!--  <button type="submit" class="btn" style="background-color: #8AF7F8;">Register</button>-->
+                <p class="py-2">Already have an account? <a href="/login" style="color:#8AF7F8;">Login</a></p>
+                <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Disclaimer and terms of service</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                <div class="modal-body">
+                    <p>World View is not responcable for the protection of your intelectual property or the moderation of other world. Please be respectful to others.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">I understand and agree</button> 
+                </div>
+            </div>
+        </div>
+    </div>
+            </form>
+        </div>
+    </div>
+</div>
