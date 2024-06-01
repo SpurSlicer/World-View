@@ -1,5 +1,5 @@
 node_modules
 package-lock.json
-.env
+src/.env
 src/views/files/world_files/*
 src/views/files/user_world_files/*
